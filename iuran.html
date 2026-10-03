@@ -1,0 +1,361 @@
+<!-- THUMBNAIL POSTINGAN BLOGGER (tersembunyi) -->
+<div style="display:none"><img src="https://placehold.co/600x400/1e3a8a/ffffff?text=Iuran+Warga" alt="Iuran Warga Perumahan"/></div>
+
+<style>
+#iw,#iw *{box-sizing:border-box;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+#iw{position:fixed;top:0;left:0;right:0;bottom:0;z-index:2147483000;background:#f1f5f9;color:#0f172a;font-size:14px;line-height:1.4;display:flex;flex-direction:column}
+#iw #view{display:flex;flex-direction:column;flex:1;min-height:0}
+#iw .top{background:#1e3a8a;color:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+#iw .top b{flex:1;font-size:16px}
+#iw button{cursor:pointer;border:0;border-radius:8px;padding:8px 14px;background:#1d4ed8;color:#fff;font-size:14px}
+#iw .top button{background:rgba(255,255,255,.18);padding:6px 10px}
+#iw button.gray{background:#64748b}#iw button.red{background:#dc2626}#iw button.sm{padding:4px 8px;font-size:12px}
+#iw #hb{display:none}
+#iw .wrap{flex:1;display:flex;min-height:0;position:relative}
+#iw .nav{width:210px;background:#fff;border-right:1px solid #e2e8f0;padding:8px;overflow:auto;flex-shrink:0}
+#iw .nav a{display:block;padding:10px 12px;border-radius:8px;cursor:pointer;color:#334155}
+#iw .nav a.on{background:#dbeafe;color:#1e3a8a;font-weight:600}
+#iw .main{flex:1;overflow:auto;padding:14px}
+@media(max-width:800px){#iw #hb{display:inline-block}#iw .nav{position:absolute;z-index:5;top:0;bottom:0;left:-240px;transition:left .2s;box-shadow:2px 0 8px rgba(0,0,0,.25)}#iw .nav.open{left:0}}
+#iw .card{background:#fff;border-radius:12px;padding:14px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+#iw .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+#iw .cards .card{margin:0}#iw .cards small{color:#64748b;display:block}#iw .cards b{font-size:19px}
+#iw .tw{overflow:auto;background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:14px}
+#iw table{border-collapse:collapse;width:100%}
+#iw th,#iw td{padding:7px 9px;border-bottom:1px solid #e2e8f0;text-align:left;white-space:nowrap}
+#iw th{background:#f8fafc}
+#iw td.ok{background:#dcfce7;color:#166534;text-align:center}
+#iw td.no{background:#fee2e2;color:#991b1b;text-align:center}
+#iw td.fu{color:#94a3b8;text-align:center}
+#iw .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+#iw .bar h2{margin:0;flex:1;font-size:18px}
+#iw input,#iw select{padding:8px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;max-width:100%;background:#fff}
+#iw .fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:10px}
+#iw .fg label{display:flex;flex-direction:column;gap:4px;font-weight:600;font-size:13px}
+#iw .mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:8px;margin:8px 0}
+#iw .mb{border:1px solid #cbd5e1;border-radius:8px;padding:8px;background:#fff}#iw .mb.dis{background:#dcfce7}
+#iw .tag{padding:2px 8px;border-radius:99px;font-size:12px;background:#e2e8f0}
+#iw .tag.g{background:#dcfce7;color:#166534}#iw .tag.r{background:#fee2e2;color:#991b1b}
+#iw .neg{color:#dc2626}
+#iw .login{flex:1;display:flex;align-items:center;justify-content:center;padding:14px;overflow:auto}
+#iw .login .card{width:min(380px,100%)}
+#iw .login input{width:100%;margin-bottom:10px}
+#iw .mod{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:20}
+#iw .mod>div{background:#fff;border-radius:12px;padding:16px;width:min(420px,92%);max-height:90%;overflow:auto}
+#iw #toast{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;padding:10px 16px;border-radius:10px;display:none;z-index:30;max-width:90%}
+</style>
+
+<div id="iw"><div id="view"></div><div id="mod" class="mod"></div><div id="toast"></div></div>
+
+<script>
+//<![CDATA[
+// KONFIGURASI APLIKASI
+// UBAH IS_PREVIEW KE false JIKA AKAN DI-DEPLOY KE BLOGGER
+const IS_PREVIEW = true; // Set default true untuk Canvas
+const GAS_URL = "URL_DEPLOY_GAS_ANDA_DISINI";
+
+const BLN=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+const THN=new Date().getFullYear(),BLNNOW=new Date().getMonth()+1;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const rp=n=>'Rp '+Number(n||0).toLocaleString('id-ID');
+const mask=n=>{n=String(n||'');return n.length<=3?n.charAt(0)+'**':n.slice(0,2)+'***'+n.slice(-1)};
+const cmp=(a,b)=>a.gang.localeCompare(b.gang)||a.idrumah.localeCompare(b.idrumah,undefined,{numeric:true});
+let D=null,TOKEN='',USER=null,DB=null;
+let S={menu:'dash',tahun:THN,gang:'',tab:'gang',payId:'',payB:[],q:''};
+const MENU=[['dash','Dashboard'],['iuran','Iuran Bulanan'],['bayar','Pembayaran'],['tunggak','Tunggakan'],['riwayat','Riwayat Pembayaran'],['rekap','Rekap Tahunan'],['master','Data Blok/Rumah']];
+
+const CFG={
+ gang:{t:'Gang',keys:['nama'],f:[{k:'nama',l:'Nama Gang'}]},
+ rumah:{t:'Rumah',keys:['idrumah'],f:[{k:'idrumah',l:'ID Rumah (mis. K1)'},{k:'gang',l:'Gang',o:()=>D.gang.map(g=>g.nama)},{k:'norumah',l:'No Rumah'},{k:'nama_pemilik',l:'Nama Pemilik'},{k:'no_telp',l:'No Telp'},{k:'status',l:'Status Rumah',o:()=>statusList()}]},
+ periode:{t:'Periode',keys:['tahun'],f:[{k:'tahun',l:'Tahun',n:1},{k:'status',l:'Status',o:()=>['aktif','tutup']}]},
+ tarif:{t:'Tarif',keys:['tahun','status_rumah'],f:[{k:'tahun',l:'Tahun',n:1,o:()=>tahunList()},{k:'status_rumah',l:'Status Rumah (mis. ditempati)'},{k:'nominal',l:'Nominal / bulan',n:1}]},
+ admin:{t:'Admin',keys:['id'],f:[{k:'id',l:'ID Login'},{k:'pass',l:'Password',p:1},{k:'nama',l:'Nama'},{k:'role',l:'Role',o:()=>['bendahara','pengurus']}]}
+};
+
+/* ===== DATA DUMMY & BACKEND PALSU (khusus mode preview) ===== */
+function buildDB(){
+ const G={MATAHARI:'K1 ISMAN,K2 DWI,K3 AHMAD KHOIRI,K4 RASI,K5 SUDARMANTO,K6 NISA',ANGREEK:'I3 ZAINUL HASAN,I4 ARIF,I5 PUTU,I6 SONDRA',SAKURA:'J2 JUNAIDI,J3 JAZIL,J5 ROSID,J6 MANSUR,J7 RIAWATI'};
+ const db={gang:[],rumah:[],periode:[{tahun:THN-1,status:'tutup'},{tahun:THN,status:'aktif'}],tarif:[],iuran:[],
+  admin:[{id:'admin',pass:'edudigital',nama:'Bendahara',role:'bendahara'},{id:'peserta',pass:'edudigital',nama:'Pengurus',role:'pengurus'}]};
+ let i=0;
+ for(const g in G){db.gang.push({nama:g});G[g].split(',').forEach(s=>{const id=s.split(' ')[0],nm=s.slice(id.length+1);i++;
+  db.rumah.push({idrumah:id,gang:g,norumah:id.slice(1),nama_pemilik:nm,no_telp:'0812000000'+(10+i),status:i%7==3?'kosong':(i%5==2?'dikontrakkan':'ditempati')})})}
+ [THN-1,THN].forEach(t=>{db.tarif.push({tahun:t,status_rumah:'ditempati',nominal:100000},{tahun:t,status_rumah:'kosong',nominal:50000},{tahun:t,status_rumah:'dikontrakkan',nominal:150000})});
+ db.rumah.forEach((r,k)=>{[THN-1,THN].forEach(t=>{
+  const mx=t<THN?12:BLNNOW-(k%4==0?3:(k%5==0?1:0));
+  for(let b=1;b<=mx;b++){if(t<THN&&k%6==0&&b>10)continue;
+   const n=db.tarif.find(x=>x.tahun==t&&x.status_rumah==r.status).nominal,m=String(b).padStart(2,'0');
+   db.iuran.push({id:'D'+t+r.idrumah+b,tanggal:t+'-'+m+'-05',gang:r.gang,idrumah:r.idrumah,nama:r.nama_pemilik,periode:t,status_rumah:r.status,bulan:b,nominal:n,metode:k%2?'Transfer':'Tunai',created_at:t+'-'+m+'-05T08:00:00',status_bayar:'aktif'})}})});
+ db.iuran[2].status_bayar='batal';
+ return db;
+}
+function mock(a,p){
+ if(a==='login'){const u=DB.admin.find(x=>x.id===p.user&&x.pass===p.pass);
+  return u?{ok:true,token:'prev-'+u.id,user:{id:u.id,nama:u.nama,role:u.role}}:{ok:false,msg:'Username atau password salah'}}
+ if(a==='publicView'){const r=DB.rumah.find(x=>x.idrumah.toLowerCase()===String(p.p).trim().toLowerCase());
+  if(!r)return{ok:false,msg:'Rumah dengan ID "'+esc(p.p)+'" tidak ditemukan'};
+  const tf=DB.tarif.find(x=>+x.tahun===THN&&x.status_rumah===r.status);
+  return{ok:true,tahun:THN,bulanKini:BLNNOW,nominal:tf?tf.nominal:0,rumah:{idrumah:r.idrumah,gang:r.gang,norumah:r.norumah,nama:mask(r.nama_pemilik),status:r.status},
+   iuran:DB.iuran.filter(i=>i.idrumah===r.idrumah&&+i.periode===THN&&i.status_bayar==='aktif').map(i=>({bulan:i.bulan,tanggal:i.tanggal,nominal:i.nominal,metode:i.metode}))}}
+ const me=DB.admin.find(x=>'prev-'+x.id===p.token);
+ if(!me)return{ok:false,msg:'Sesi berakhir, silakan login ulang'};
+ if(a==='getAll')return{ok:true,gang:DB.gang,rumah:DB.rumah,periode:DB.periode,tarif:DB.tarif,iuran:DB.iuran,admin:me.role==='bendahara'?DB.admin.map(x=>({id:x.id,nama:x.nama,role:x.role})):[]};
+ if(me.role!=='bendahara')return{ok:false,msg:'Akses ditolak (hanya bendahara)'};
+ if(a==='savePayment'){
+  const r=DB.rumah.find(x=>x.idrumah===p.idrumah),pr=DB.periode.find(x=>+x.tahun===+p.tahun);
+  if(!r||!pr)return{ok:false,msg:'Rumah/periode tidak valid'};
+  if(pr.status==='tutup')return{ok:false,msg:'Periode '+p.tahun+' sudah ditutup'};
+  const tf=DB.tarif.find(x=>+x.tahun===+p.tahun&&x.status_rumah===r.status);
+  if(!tf)return{ok:false,msg:'Tarif status "'+r.status+'" tahun '+p.tahun+' belum diatur'};
+  for(const b of p.bulan)if(DB.iuran.some(i=>i.idrumah===r.idrumah&&+i.periode===+p.tahun&&+i.bulan===b&&i.status_bayar==='aktif'))return{ok:false,msg:'Bulan '+BLN[b-1]+' sudah dibayar'};
+  p.bulan.forEach(b=>DB.iuran.push({id:'T'+Date.now()+b,tanggal:p.tanggal,gang:r.gang,idrumah:r.idrumah,nama:r.nama_pemilik,periode:+p.tahun,status_rumah:r.status,bulan:b,nominal:+tf.nominal,metode:p.metode,created_at:new Date().toISOString().slice(0,19),status_bayar:'aktif'}));
+  return{ok:true}}
+ if(a==='cancelPayment'){const x=DB.iuran.find(i=>i.id===p.id);if(!x)return{ok:false,msg:'Data tidak ditemukan'};x.status_bayar='batal';return{ok:true}}
+ if(a==='saveRow'||a==='delRow'){
+  const c=CFG[p.sheet],arr=DB[p.sheet],idx=arr.findIndex(x=>c.keys.every(k=>String(x[k])===String(p.row[k])));
+  if(a==='delRow'){if(idx<0)return{ok:false,msg:'Data tidak ditemukan'};arr.splice(idx,1);return{ok:true}}
+  if(p.isNew){if(idx>=0)return{ok:false,msg:'Data dengan kunci tersebut sudah ada'};arr.push(p.row)}
+  else{if(idx<0)return{ok:false,msg:'Data tidak ditemukan'};if(p.sheet==='admin'&&!p.row.pass)p.row.pass=arr[idx].pass;arr[idx]=p.row}
+  return{ok:true}}
+ return{ok:false,msg:'Aksi tidak dikenal'};
+}
+async function api(a,p){
+ p=p||{};p.action=a;p.token=TOKEN;
+ try{
+  if(IS_PREVIEW){await new Promise(r=>setTimeout(r,120));return JSON.parse(JSON.stringify(mock(a,JSON.parse(JSON.stringify(p)))))}
+  const r=await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(p)});
+  return await r.json();
+ }catch(e){return{ok:false,msg:'Gagal terhubung ke server: '+e}}
+}
+
+/* ===== UTIL ===== */
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',3200)}
+const canEdit=()=>USER&&USER.role==='bendahara';
+const tahunList=()=>D.periode.map(x=>+x.tahun).sort((a,b)=>b-a);
+const statusList=()=>[...new Set(D.tarif.map(x=>x.status_rumah))];
+const tarifOf=(t,st)=>{const x=D.tarif.find(r=>+r.tahun===+t&&r.status_rumah===st);return x?+x.nominal:null};
+const lunas=(id,t,b)=>D.iuran.find(r=>r.idrumah===id&&+r.periode===+t&&+r.bulan===b&&r.status_bayar==='aktif');
+const sampai=t=>+t<THN?12:(+t===THN?BLNNOW:0);
+function tunggak(r,t){const n=tarifOf(t,r.status)||0,m=[];for(let b=1;b<=sampai(t);b++)if(!lunas(r.idrumah,t,b))m.push(b);return{m:m,total:m.length*n}}
+function usedBy(sh,row){
+ if(sh==='gang')return D.rumah.some(r=>r.gang===row.nama);
+ if(sh==='rumah')return D.iuran.some(r=>r.idrumah===row.idrumah);
+ if(sh==='periode')return D.iuran.some(r=>+r.periode===+row.tahun)||D.tarif.some(r=>+r.tahun===+row.tahun);
+ if(sh==='tarif')return D.iuran.some(r=>+r.periode===+row.tahun&&r.status_rumah===row.status_rumah);
+ return sh==='admin'&&row.id===USER.id;
+}
+function bar(t,g){
+ const ths=S.menu==='master'?'':'<select onchange="S.tahun=+this.value;S.payB=[];render()">'+tahunList().map(y=>'<option '+(y==S.tahun?'selected':'')+'>'+y+'</option>').join('')+'</select>';
+ const gs=g?'<select onchange="S.gang=this.value;render()"><option value="">Semua gang</option>'+D.gang.map(x=>'<option '+(x.nama===S.gang?'selected':'')+'>'+esc(x.nama)+'</option>').join('')+'</select>':'';
+ return '<div class="bar"><h2>'+t+'</h2>'+ths+gs+'</div>';
+}
+
+/* ===== LOGIN / SESI ===== */
+function showLogin(){
+ $('#view').innerHTML='<div class="top"><b>Iuran Warga Perumahan'+(IS_PREVIEW?' (Preview)':'')+'</b></div><div class="login"><div class="card"><h3 style="margin-top:0">Login Bendahara</h3>'
+ +'<input id="lu" placeholder="Username" autocomplete="username"><input id="lp" type="password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key===\'Enter\')doLogin()">'
+ +'<button style="width:100%" onclick="doLogin()">Masuk</button>'
+ +(IS_PREVIEW?'<hr style="margin:14px 0;border:0;border-top:1px solid #e2e8f0"><p style="font-size:12px;color:#64748b;margin:0 0 8px">Mode Preview (data dummy).<br>admin / edudigital (bendahara)<br>peserta / edudigital (pengurus, hanya lihat)</p><p style="margin:0 0 6px;font-weight:600;font-size:13px">Coba tampilan warga:</p><input id="dp" placeholder="ID rumah, mis. K1" style="margin-bottom:6px"><button class="gray" style="width:100%" onclick="showPublic($(\'#dp\').value)">Lihat Iuran Warga</button>':'')
+ +'</div></div>';
+}
+async function doLogin(){
+ const r=await api('login',{user:$('#lu').value.trim(),pass:$('#lp').value});
+ if(!r.ok)return toast(r.msg||'Login gagal');
+ TOKEN=r.token;USER=r.user;
+ try{sessionStorage.setItem('iw',JSON.stringify({t:TOKEN,u:USER}))}catch(e){}
+ if(await load())shell();
+}
+function logout(){TOKEN='';USER=null;D=null;try{sessionStorage.removeItem('iw')}catch(e){}showLogin()}
+async function load(){
+ const r=await api('getAll');
+ if(!r.ok){logout();toast(r.msg||'Gagal memuat data');return false}
+ D=r;
+ if(!tahunList().includes(S.tahun))S.tahun=tahunList()[0]||THN;
+ if(!S.payId&&D.rumah.length)S.payId=[...D.rumah].sort(cmp)[0].idrumah;
+ return true;
+}
+function shell(){
+ $('#view').innerHTML='<div class="top"><button id="hb" onclick="$(\'.nav\').classList.toggle(\'open\')">☰</button><b>Iuran Warga'+(IS_PREVIEW?' (Preview)':'')+'</b><span>'+esc(USER.nama)+' · '+USER.role+'</span><button onclick="logout()">Keluar</button></div>'
+ +'<div class="wrap"><div class="nav">'+MENU.map(m=>'<a id="m_'+m[0]+'" onclick="go(\''+m[0]+'\')">'+m[1]+'</a>').join('')+'</div><div class="main" id="main"></div></div>';
+ render();
+}
+function go(m){S.menu=m;$('.nav').classList.remove('open');render()}
+function render(){
+ MENU.forEach(m=>{const a=$('#m_'+m[0]);if(a)a.className=S.menu===m[0]?'on':''});
+ $('#main').innerHTML=({dash:vDash,iuran:vIuran,bayar:vBayar,tunggak:vTung,riwayat:vRiw,rekap:vRekap,master:vMaster})[S.menu]();
+ if(S.menu==='bayar'&&canEdit()&&D.rumah.length)pm();
+}
+
+/* ===== DASHBOARD ===== */
+function vDash(){
+ const t=S.tahun;let tot=0,tg=0,tgR=0,target=0;
+ D.iuran.forEach(r=>{if(+r.periode===+t&&r.status_bayar==='aktif')tot+=+r.nominal});
+ D.rumah.forEach(r=>{const n=tarifOf(t,r.status)||0;let m=0;for(let b=1;b<=sampai(t);b++){target+=n;if(!lunas(r.idrumah,t,b)){tg+=n;m++}}if(m)tgR++});
+ const pct=target?Math.round((target-tg)/target*100):0;
+ return bar('Dashboard')+'<div class="cards"><div class="card"><small>Total terkumpul</small><b>'+rp(tot)+'</b></div><div class="card"><small>Total tunggakan s/d bulan ini</small><b class="neg">'+rp(tg)+'</b></div><div class="card"><small>Rumah menunggak</small><b>'+tgR+' / '+D.rumah.length+'</b></div><div class="card"><small>Tingkat pelunasan</small><b>'+pct+'%</b></div></div>'
+ +'<div class="card">Periode <b>'+t+'</b> · Bulan berjalan: <b>'+(sampai(t)?BLN[sampai(t)-1]:'-')+'</b>. Gunakan menu di samping untuk mencatat pembayaran dan memantau tunggakan.</div>';
+}
+
+/* ===== IURAN BULANAN ===== */
+function vIuran(){
+ const t=S.tahun,rows=D.rumah.filter(r=>!S.gang||r.gang===S.gang).sort(cmp);
+ let h=bar('Iuran Bulanan',1)+'<div class="tw"><table><tr><th>Rumah</th><th>Nama</th><th>Status</th>'+BLN.map(b=>'<th>'+b+'</th>').join('')+'</tr>';
+ rows.forEach(r=>{h+='<tr><td><b>'+esc(r.idrumah)+'</b></td><td>'+esc(r.nama_pemilik)+'</td><td>'+esc(r.status)+'</td>';
+  for(let b=1;b<=12;b++){const p=lunas(r.idrumah,t,b);
+   if(p)h+='<td class="ok" title="'+esc(p.tanggal+' · '+p.metode+' · '+rp(p.nominal))+'">✓</td>';
+   else if(b<=sampai(t))h+='<td class="no" '+(canEdit()?'style="cursor:pointer" onclick="payFor(\''+r.idrumah+'\','+b+')"':'')+'>✗</td>';
+   else h+='<td class="fu">·</td>'}
+  h+='</tr>'});
+ return h+'</table></div><p style="color:#64748b">✓ lunas · ✗ belum bayar (klik untuk membayar) · · belum jatuh tempo</p>';
+}
+function payFor(id,b){S.payId=id;S.payB=[b];S.menu='bayar';render()}
+
+/* ===== PEMBAYARAN ===== */
+function vBayar(){
+ if(!canEdit())return bar('Pembayaran')+'<div class="card">Role Anda hanya dapat melihat data. Input pembayaran hanya untuk bendahara.</div>';
+ if(!D.rumah.length)return bar('Pembayaran')+'<div class="card">Belum ada data rumah. Tambahkan di menu Data Blok/Rumah.</div>';
+ const today=new Date().toISOString().slice(0,10);
+ return bar('Pembayaran')+'<div class="card"><div class="fg"><label>Rumah<select id="pr" onchange="S.payB=[];pm()">'
+ +[...D.rumah].sort(cmp).map(r=>'<option value="'+esc(r.idrumah)+'" '+(r.idrumah===S.payId?'selected':'')+'>'+esc(r.idrumah)+' - '+esc(r.nama_pemilik)+' ('+esc(r.gang)+')</option>').join('')
+ +'</select></label><label>Tanggal bayar<input type="date" id="pt" value="'+today+'"></label><label>Metode<select id="pmt"><option>Tunai</option><option>Transfer</option></select></label></div><div id="pm"></div><button onclick="simpanBayar()">Simpan Pembayaran</button></div>';
+}
+function pm(){
+ const sel=$('#pr');if(!sel)return;
+ const id=sel.value;S.payId=id;
+ const r=D.rumah.find(x=>x.idrumah===id),t=S.tahun,n=tarifOf(t,r.status);
+ let h='<p>Status rumah: <b>'+esc(r.status)+'</b> · Iuran per bulan: <b>'+(n==null?'<span class="neg">tarif belum diatur</span>':rp(n))+'</b></p><div class="mg">';
+ for(let b=1;b<=12;b++){const p=lunas(id,t,b);
+  h+='<label class="mb '+(p?'dis':'')+'"><input type="checkbox" '+(p?'disabled checked':(S.payB.includes(b)?'checked':''))+' onchange="togB('+b+',this.checked)"> '+BLN[b-1]+(p?' ✓':'')+'</label>'}
+ $('#pm').innerHTML=h+'</div><p>Total dibayar: <b>'+rp((n||0)*S.payB.length)+'</b> ('+S.payB.length+' bulan, periode '+t+')</p>';
+}
+function togB(b,c){S.payB=c?S.payB.concat([b]):S.payB.filter(x=>x!==b);pm()}
+async function simpanBayar(){
+ if(!S.payB.length)return toast('Pilih minimal satu bulan');
+ const r=await api('savePayment',{idrumah:S.payId,tahun:S.tahun,bulan:S.payB,tanggal:$('#pt').value,metode:$('#pmt').value});
+ if(!r.ok)return toast(r.msg||'Gagal menyimpan');
+ toast('Pembayaran tersimpan');S.payB=[];await load();render();
+}
+
+/* ===== TUNGGAKAN ===== */
+function vTung(){
+ const t=S.tahun;
+ const L=D.rumah.filter(r=>!S.gang||r.gang===S.gang).map(r=>Object.assign({r:r},tunggak(r,t))).filter(x=>x.m.length).sort((a,b)=>b.total-a.total);
+ let g=0;
+ let h=bar('Tunggakan (s/d bulan berjalan)',1)+'<div class="tw"><table><tr><th>Rumah</th><th>Nama</th><th>Gang</th><th>Status</th><th>Bulan menunggak</th><th>Jml</th><th>Total</th></tr>';
+ L.forEach(x=>{g+=x.total;h+='<tr><td><b>'+esc(x.r.idrumah)+'</b></td><td>'+esc(x.r.nama_pemilik)+'</td><td>'+esc(x.r.gang)+'</td><td>'+esc(x.r.status)+'</td><td>'+x.m.map(b=>BLN[b-1]).join(', ')+'</td><td>'+x.m.length+'</td><td class="neg"><b>'+rp(x.total)+'</b></td></tr>'});
+ if(!L.length)h+='<tr><td colspan="7">Tidak ada tunggakan 🎉</td></tr>';
+ return h+'<tr><th colspan="6">TOTAL TUNGGAKAN</th><th>'+rp(g)+'</th></tr></table></div>';
+}
+
+/* ===== RIWAYAT ===== */
+function vRiw(){
+ const q=S.q.toLowerCase();
+ let L=D.iuran.filter(r=>+r.periode===+S.tahun&&(!S.gang||r.gang===S.gang)&&(!q||(r.idrumah+' '+r.nama).toLowerCase().includes(q))).sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)));
+ const n=L.length;L=L.slice(0,300);
+ let h=bar('Riwayat Pembayaran',1).replace('</div>','<input placeholder="Cari ID/nama (Enter)" value="'+esc(S.q)+'" onchange="S.q=this.value;render()"></div>');
+ h+='<div class="tw"><table><tr><th>Tanggal</th><th>Rumah</th><th>Nama</th><th>Gang</th><th>Bulan</th><th>Nominal</th><th>Metode</th><th>Status</th>'+(canEdit()?'<th>Aksi</th>':'')+'</tr>';
+ L.forEach(r=>{const a=r.status_bayar==='aktif';
+  h+='<tr style="'+(a?'':'opacity:.55;text-decoration:line-through')+'"><td>'+esc(r.tanggal)+'</td><td><b>'+esc(r.idrumah)+'</b></td><td>'+esc(r.nama)+'</td><td>'+esc(r.gang)+'</td><td>'+BLN[r.bulan-1]+' '+r.periode+'</td><td>'+rp(r.nominal)+'</td><td>'+esc(r.metode)+'</td><td><span class="tag '+(a?'g':'r')+'">'+(a?'aktif':'batal')+'</span></td>'
+  +(canEdit()?'<td>'+(a?'<button class="sm red" onclick="batal(\''+esc(r.id)+'\')">Batalkan</button>':'')+'</td>':'')+'</tr>'});
+ if(!L.length)h+='<tr><td colspan="9">Belum ada data</td></tr>';
+ return h+'</table></div>'+(n>300?'<p style="color:#64748b">Menampilkan 300 dari '+n+' data terbaru. Gunakan pencarian/filter.</p>':'');
+}
+async function batal(id){
+ if(!confirm('Batalkan pembayaran ini? Data tetap tersimpan di riwayat berstatus batal.'))return;
+ const r=await api('cancelPayment',{id:id});
+ if(!r.ok)return toast(r.msg);toast('Pembayaran dibatalkan');await load();render();
+}
+
+/* ===== REKAP TAHUNAN ===== */
+function vRekap(){
+ const t=S.tahun,gs=D.gang.map(g=>g.nama),M={};
+ gs.forEach(g=>M[g]=new Array(12).fill(0));
+ D.iuran.forEach(r=>{if(+r.periode===+t&&r.status_bayar==='aktif'&&M[r.gang])M[r.gang][r.bulan-1]+=+r.nominal});
+ const tg={};gs.forEach(g=>tg[g]=0);
+ D.rumah.forEach(r=>{if(tg[r.gang]!=null)tg[r.gang]+=tunggak(r,t).total});
+ const col=new Array(12).fill(0);let gt=0,gtg=0;
+ let h='<div id="rk"><h3>Rekap Iuran Tahun '+t+'</h3><div class="tw"><table><tr><th>Gang</th>'+BLN.map(b=>'<th>'+b+'</th>').join('')+'<th>Total</th><th>Tunggakan</th></tr>';
+ gs.forEach(g=>{const s=M[g].reduce((a,b)=>a+b,0);gt+=s;gtg+=tg[g];
+  h+='<tr><td><b>'+esc(g)+'</b></td>'+M[g].map((v,i)=>{col[i]+=v;return '<td>'+(v?v.toLocaleString('id-ID'):'-')+'</td>'}).join('')+'<td><b>'+rp(s)+'</b></td><td class="neg">'+rp(tg[g])+'</td></tr>'});
+ h+='<tr><th>TOTAL</th>'+col.map(v=>'<th>'+(v?v.toLocaleString('id-ID'):'-')+'</th>').join('')+'<th>'+rp(gt)+'</th><th>'+rp(gtg)+'</th></tr></table></div></div>';
+ return bar('Rekap Tahunan',0).replace('</div>','<button onclick="cetak()">Cetak</button></div>')+h;
+}
+function cetak(){
+ const w=window.open('','_blank');if(!w)return toast('Pop-up diblokir browser');
+ w.document.write('<html><head><title>Rekap Iuran</title><style>body{font-family:sans-serif}table{border-collapse:collapse;width:100%}td,th{border:1px solid #999;padding:4px;font-size:12px;text-align:left}</style></head><body>'+$('#rk').innerHTML+'</body></html>');
+ w.document.close();w.print();
+}
+
+/* ===== DATA MASTER ===== */
+function vMaster(){
+ const tabs=['gang','rumah','periode','tarif'].concat(canEdit()?['admin']:[]);
+ if(!tabs.includes(S.tab))S.tab='gang';
+ const c=CFG[S.tab],arr=D[S.tab],cols=c.f.filter(f=>!f.p);
+ let h='<div class="bar"><h2>Data Blok/Rumah</h2></div><div class="bar">'+tabs.map(t=>'<button class="'+(S.tab===t?'':'gray')+'" onclick="S.tab=\''+t+'\';render()">'+CFG[t].t+'</button>').join('')
+ +(canEdit()?'<button style="margin-left:auto" onclick="openForm(\''+S.tab+'\',-1)">+ Tambah</button>':'')+'</div>'
+ +'<div class="tw"><table><tr>'+cols.map(f=>'<th>'+f.l+'</th>').join('')+(canEdit()?'<th>Aksi</th>':'')+'</tr>';
+ arr.forEach((r,i)=>{h+='<tr>'+cols.map(f=>'<td>'+(f.k==='nominal'?rp(r[f.k]):esc(r[f.k]))+'</td>').join('')
+  +(canEdit()?'<td><button class="sm" onclick="openForm(\''+S.tab+'\','+i+')">Edit</button> <button class="sm red" onclick="delRow(\''+S.tab+'\','+i+')">Hapus</button></td>':'')+'</tr>'});
+ if(!arr.length)h+='<tr><td colspan="9">Belum ada data</td></tr>';
+ return h+'</table></div>'+(S.tab==='tarif'?'<p style="color:#64748b">Daftar status rumah (ditempati/kosong/dikontrakkan, dst.) mengikuti data tarif ini. Tambah status baru dengan menambah tarifnya.</p>':'');
+}
+function openForm(sh,i){
+ const c=CFG[sh],r=i>=0?D[sh][i]:{};
+ $('#mod').innerHTML='<div><h3 style="margin-top:0">'+(i>=0?'Edit':'Tambah')+' '+c.t+'</h3>'+c.f.map(f=>{
+  const ro=(i>=0&&c.keys.includes(f.k))?'disabled':'',v=r[f.k]==null?'':r[f.k];
+  const inp=f.o?'<select id="f_'+f.k+'" '+ro+' style="width:100%">'+f.o().map(o=>'<option '+(String(o)===String(v)?'selected':'')+'>'+esc(o)+'</option>').join('')+'</select>'
+   :'<input id="f_'+f.k+'" '+ro+' style="width:100%" '+(f.p?'type="password" placeholder="'+(i>=0?'kosongkan jika tidak diubah':'')+'"':'value="'+esc(v)+'"')+'>';
+  return '<label style="display:block;margin-bottom:8px;font-weight:600;font-size:13px">'+f.l+inp+'</label>'}).join('')
+ +'<div style="text-align:right"><button class="gray" onclick="closeMod()">Batal</button> <button onclick="saveForm(\''+sh+'\','+i+')">Simpan</button></div></div>';
+ $('#mod').style.display='flex';
+}
+function closeMod(){$('#mod').style.display='none'}
+async function saveForm(sh,i){
+ const c=CFG[sh],row={};
+ for(const f of c.f){let v=$('#f_'+f.k).value.trim();if(f.n)v=+v;
+  if((v===''||v!==v)&&f.k!=='no_telp'&&!(f.p&&i>=0))return toast(f.l+' wajib diisi');row[f.k]=v}
+ if(/[\s?&=]/.test(row.idrumah||''))return toast('ID Rumah tidak boleh mengandung spasi atau simbol ? & =');
+ const r=await api('saveRow',{sheet:sh,row:row,isNew:i<0});
+ if(!r.ok)return toast(r.msg||'Gagal menyimpan');
+ closeMod();toast('Data tersimpan');await load();render();
+}
+async function delRow(sh,i){
+ const r=D[sh][i];
+ if(usedBy(sh,r))return toast('Tidak bisa dihapus: data masih dipakai/terkait (atau akun yang sedang login)');
+ if(!confirm('Hapus data ini?'))return;
+ const x=await api('delRow',{sheet:sh,row:r});
+ if(!x.ok)return toast(x.msg);toast('Data dihapus');await load();render();
+}
+
+/* ===== TAMPILAN WARGA (publik, ?p=idrumah) ===== */
+async function showPublic(id){
+ id=String(id||'').trim();if(!id)return toast('Isi ID rumah');
+ const r=await api('publicView',{p:id});
+ const back=IS_PREVIEW?'<button onclick="showLogin()">Kembali</button>':'';
+ let h='<div class="top"><b>Iuran Warga Perumahan</b>'+back+'</div><div class="main"><div style="max-width:760px;margin:auto">';
+ if(!r.ok)return $('#view').innerHTML=h+'<div class="card"><h3 style="margin-top:0">Data tidak ditemukan</h3><p>'+(r.msg||'')+'</p></div></div></div>';
+ const x=r.rumah;let tot=0,tg=0,tm=[];
+ let rows='';
+ for(let b=1;b<=12;b++){const p=r.iuran.find(i=>+i.bulan===b);
+  if(p){tot+=+p.nominal;rows+='<tr><td>'+BLN[b-1]+'</td><td><span class="tag g">Lunas</span></td><td>'+esc(p.tanggal)+'</td><td>'+rp(p.nominal)+'</td><td>'+esc(p.metode)+'</td></tr>'}
+  else if(b<=r.bulanKini){tg+=+r.nominal;tm.push(BLN[b-1]);rows+='<tr><td>'+BLN[b-1]+'</td><td><span class="tag r">Belum bayar</span></td><td>-</td><td>'+rp(r.nominal)+'</td><td>-</td></tr>'}
+  else rows+='<tr><td>'+BLN[b-1]+'</td><td><span class="tag">Belum jatuh tempo</span></td><td>-</td><td>-</td><td>-</td></tr>'}
+ h+='<div class="card"><h3 style="margin:0 0 6px">Rumah '+esc(x.idrumah)+' · Gang '+esc(x.gang)+'</h3>Pemilik: <b>'+esc(x.nama)+'</b> · Status: <b>'+esc(x.status)+'</b> · Iuran/bulan: <b>'+rp(r.nominal)+'</b><br>Periode: <b>'+r.tahun+'</b></div>'
+ +'<div class="cards"><div class="card"><small>Total sudah dibayar</small><b>'+rp(tot)+'</b></div><div class="card"><small>Tunggakan s/d '+BLN[r.bulanKini-1]+'</small><b class="'+(tg?'neg':'')+'">'+rp(tg)+'</b></div></div>'
+ +(tm.length?'<div class="card neg">Bulan belum dibayar: '+tm.join(', ')+'</div>':'<div class="card">Iuran Anda lunas sampai bulan berjalan. Terima kasih 🙏</div>')
+ +'<div class="tw"><table><tr><th>Bulan</th><th>Status</th><th>Tanggal</th><th>Nominal</th><th>Metode</th></tr>'+rows+'</table></div></div></div>';
+ $('#view').innerHTML=h;
+}
+
+/* ===== BOOT ===== */
+(async function(){
+ try{document.body.style.overflow='hidden'}catch(e){}
+ if(IS_PREVIEW)DB=buildDB();
+ const p=new URLSearchParams(location.search).get('p');
+ if(p)return showPublic(p);
+ try{const s=JSON.parse(sessionStorage.getItem('iw')||'null');if(s){TOKEN=s.t;USER=s.u;if(await load())return shell()}}catch(e){}
+ showLogin();
+})();
+//]]>
+</script>
