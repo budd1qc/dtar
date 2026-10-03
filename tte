@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dtar E-Signature</title>
+    <!-- PWA Manifest & Icons (Injected via JS) -->
+    <link id="pwa-manifest" rel="manifest" href="">
+    <meta name="theme-color" content="#f97316">
+    <link rel="apple-touch-icon" href="https://via.placeholder.com/192x192.png?text=Dtar+Icon">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- QRCode.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Signature Pad -->
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { primary: '#f97316', primaryDark: '#ea580c', primaryLight: '#fdba74' }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; margin: 0; padding: 0; overflow-x: hidden; }
+         #dtar-app-container {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+            z-index: 999999999; background-color: #f9fafb; overflow-y: auto; overflow-x: hidden;
+        }
+        /* Glassmorphism Classes */
+        .glass {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+        .glass-primary {
+            background: rgba(249, 115, 22, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(249, 115, 22, 0.2);
+        }
+        
+        /* Signature Canvas */
+        .signature-pad-wrapper {
+            position: relative; width: 100%; height: 250px; background-color: white; 
+            border: 2px dashed #cbd5e1; border-radius: 0.5rem; overflow: hidden;
+        }
+        .signature-pad-wrapper canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; cursor: crosshair;}
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Loader */
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #f97316; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Layout & Responsiveness */
+      /* Semua screen disembunyikan secara default. JavaScript akan menentukan screen mana yang ditampilkan. */
+      #login-screen, 
+      #admin-layout, 
+      #public-screen 
+      { display: none; }
+
+        /* Bottom Nav Fix for iOS */
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+    </style>
+  
+  <script> /* * EARLY ROUTING * ----------------------------- * Dibaca sedini mungkin sebelum Firebase * dan script aplikasi selesai dimuat. * * Tujuan: * ?sign=TOKEN -> public screen * ?verify=ID -> public screen * tanpa transit ke login screen. */ (function () { const params = new URLSearchParams(window.location.search); const hasSign = params.has('sign') && params.get('sign'); const hasVerify = params.has('verify') && params.get('verify'); if (hasSign || hasVerify) { document.documentElement.classList.add('public-route'); } else { document.documentElement.classList.add('admin-route'); } })(); </script>
+<style> /* Pastikan route publik tidak pernah menampilkan login/admin */ html.public-route #login-screen, html.public-route #admin-layout { display: none !important; } /* Login tetap tersembunyi sampai auth selesai */ html.admin-route #login-screen, html.admin-route #admin-layout { display: none; } </style>
+  
+</head>
+  <div id="dtar-app-container"> 
+<body class="text-slate-800 antialiased h-screen flex flex-col">
+
+    <!-- Global Loading Overlay -->
+    <div id="global-loader" class="fixed inset-0 bg-white/90 z-50 flex flex-col items-center justify-center hidden">
+        <div class="loader mb-4" style="width: 50px; height: 50px;"></div>
+        <p class="text-primary font-medium" id="loader-text">Memuat Data...</p>
+    </div>
+
+    <!-- NOTIFICATION TOAST -->
+    <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-full shadow-lg z-[100] hidden transition-all duration-300 opacity-0 font-medium text-sm text-center min-w-[200px]"></div>
+
+    <!-- 1. LOGIN SCREEN -->
+    <div id="login-screen" class="min-h-screen w-full items-center justify-center bg-gradient-to-br from-orange-50 to-orange-100 p-4">
+        <div class="glass p-8 rounded-3xl w-full max-w-md shadow-2xl relative overflow-hidden">
+            <div class="absolute top-[-50px] right-[-50px] w-32 h-32 bg-primary rounded-full opacity-20 blur-2xl"></div>
+            <div class="absolute bottom-[-50px] left-[-50px] w-32 h-32 bg-orange-400 rounded-full opacity-20 blur-2xl"></div>
+            
+            <div class="text-center mb-8 relative z-10">
+                <div class="w-16 h-16 bg-gradient-to-tr from-primary to-orange-400 rounded-2xl mx-auto flex items-center justify-center shadow-lg mb-4">
+                    <i class="fa-solid fa-signature text-3xl text-white"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800 tracking-tight">Dtar E-Signature</h1>
+                <p class="text-sm text-gray-500 mt-1">Sistem Penandatanganan Digital</p>
+            </div>
+
+            <form id="login-form" class="space-y-5 relative z-10">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email Admin</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="email" id="login-email" required class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-white/50 transition-all" placeholder="admin@dtar.com">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="password" id="login-password" required class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent outline-none bg-white/50 transition-all" placeholder="••••••••">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white font-semibold py-3 rounded-xl shadow-lg shadow-orange-200 transition-all active:scale-95 flex justify-center items-center gap-2">
+                    Masuk Dashboard <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. ADMIN LAYOUT -->
+    <div id="admin-layout" class="h-screen w-full bg-slate-50 flex overflow-hidden">
+        
+        <!-- Desktop Sidebar -->
+        <aside class="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 z-20 h-full shadow-sm">
+            <div class="p-6 flex items-center gap-3 border-b border-slate-100">
+                <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                    <i class="fa-solid fa-signature text-white text-sm"></i>
+                </div>
+                <span class="font-bold text-lg text-slate-800">Dtar E-Sign</span>
+            </div>
+            <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+                <a href="#" onclick="navigateAdmin('dashboard')" id="nav-desktop-dashboard" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-orange-50 hover:text-primary transition-colors font-medium">
+                    <i class="fa-solid fa-house w-5"></i> Dashboard
+                </a>
+                <a href="#" onclick="navigateAdmin('surat')" id="nav-desktop-surat" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-orange-50 hover:text-primary transition-colors font-medium">
+                    <i class="fa-solid fa-file-signature w-5"></i> Manajemen Surat
+                </a>
+                <a href="#" onclick="navigateAdmin('pengurus')" id="nav-desktop-pengurus" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-orange-50 hover:text-primary transition-colors font-medium">
+                    <i class="fa-solid fa-users w-5"></i> Data Pengurus
+                </a>
+            </nav>
+            <div class="p-4 border-t border-slate-100">
+                <button onclick="logoutApp()" class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-red-500 hover:bg-red-50 transition-colors font-medium">
+                    <i class="fa-solid fa-right-from-bracket"></i> Keluar
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col h-full relative overflow-hidden pb-16 md:pb-0">
+            <!-- Mobile Header -->
+            <header class="md:hidden glass flex items-center justify-between p-4 sticky top-0 z-30">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="fa-solid fa-signature text-white text-sm"></i>
+                    </div>
+                    <span class="font-bold text-lg text-slate-800">Dtar E-Sign</span>
+                </div>
+                <button onclick="logoutApp()" class="w-8 h-8 flex items-center justify-center text-red-500 bg-red-50 rounded-full">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+            </header>
+
+            <!-- Scrollable Content -->
+            <div class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth" id="main-scroll-area">
+                
+                <!-- View: Dashboard -->
+                <div id="view-dashboard" class="admin-view hidden space-y-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800">Dashboard</h2>
+                        <p class="text-slate-500">Ringkasan statistik penandatanganan elektronik.</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="glass p-5 rounded-2xl flex items-center gap-4">
+                            <div class="w-12 h-12 bg-blue-100 text-blue-500 rounded-xl flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-envelope"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-slate-500 font-medium">Total Surat</p>
+                                <p class="text-2xl font-bold text-slate-800" id="stat-total">0</p>
+                            </div>
+                        </div>
+                        <div class="glass p-5 rounded-2xl flex items-center gap-4">
+                            <div class="w-12 h-12 bg-orange-100 text-orange-500 rounded-xl flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-slate-500 font-medium">Menunggu TTD</p>
+                                <p class="text-2xl font-bold text-slate-800" id="stat-pending">0</p>
+                            </div>
+                        </div>
+                        <div class="glass p-5 rounded-2xl flex items-center gap-4">
+                            <div class="w-12 h-12 bg-green-100 text-green-500 rounded-xl flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-check-double"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-slate-500 font-medium">Surat Selesai</p>
+                                <p class="text-2xl font-bold text-slate-800" id="stat-selesai">0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass p-6 rounded-2xl text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-4 border-l-4 border-primary">
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-800">Buat Surat Baru</h3>
+                            <p class="text-sm text-slate-500">Mulai proses penandatanganan dokumen baru sekarang.</p>
+                        </div>
+                        <button onclick="showCreateSurat()" class="bg-primary hover:bg-primaryDark text-white px-6 py-2.5 rounded-xl font-medium shadow-md transition-all active:scale-95 whitespace-nowrap">
+                            <i class="fa-solid fa-plus mr-2"></i> Buat Surat
+                        </button>
+                    </div>
+                </div>
+
+                <!-- View: Manajemen Surat -->
+                <div id="view-surat" class="admin-view hidden space-y-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800">Manajemen Surat</h2>
+                            <p class="text-slate-500">Kelola dan pantau status dokumen.</p>
+                        </div>
+                        <button onclick="showCreateSurat()" class="bg-primary text-white px-4 py-2 rounded-xl font-medium shadow-md hover:bg-primaryDark flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-plus"></i> Surat Baru
+                        </button>
+                    </div>
+
+                    <div class="glass p-4 rounded-2xl flex flex-col md:flex-row gap-3">
+                        <div class="relative flex-1">
+                            <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="search-surat" onkeyup="renderSuratList()" placeholder="Cari No. Surat / Keterangan..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-primary text-sm">
+                        </div>
+                        <div class="flex gap-2 w-full md:w-auto">
+                            <select id="sort-surat" onchange="renderSuratList()" class="flex-1 md:flex-none bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-primary text-sm">
+                                <option value="terbaru">Terbaru</option>
+                                <option value="terlama">Terlama</option>
+                            </select>
+                            <select id="filter-surat" onchange="renderSuratList()" class="flex-1 md:flex-none bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-primary text-sm">
+                                <option value="all">Semua Status</option>
+                                <option value="Menunggu">Menunggu</option>
+                                <option value="Selesai">Selesai</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4" id="surat-list-container">
+                        <!-- Surat Items injected by JS -->
+                    </div>
+                </div>
+
+                <!-- View: Buat Surat Baru (Form) -->
+                <div id="view-surat-create" class="admin-view hidden space-y-6">
+                    <div class="flex items-center gap-3">
+                        <button onclick="navigateAdmin('surat')" class="w-10 h-10 flex items-center justify-center bg-white rounded-xl shadow-sm text-slate-500 hover:text-primary">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                        <h2 class="text-2xl font-bold text-slate-800">Buat Surat Baru</h2>
+                    </div>
+
+                    <form id="form-create-surat" class="glass p-6 rounded-2xl space-y-5">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Nomor Surat <span class="text-red-500">*</span></label>
+                                <input type="text" id="cs-no" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-primary outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Tanggal Surat <span class="text-red-500">*</span></label>
+                                <input type="date" id="cs-tgl" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-primary outline-none text-sm">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Keterangan / Perihal <span class="text-red-500">*</span></label>
+                            <input type="text" id="cs-ket" required placeholder="Contoh: SK Pengangkatan Pengurus Baru" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-primary outline-none text-sm">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Link Dokumen (G-Drive / Publik) <span class="text-red-500">*</span></label>
+                            <input type="url" id="cs-link" required placeholder="https://..." class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-primary outline-none text-sm">
+                            <p class="text-xs text-slate-500 mt-1">Pastikan link dapat diakses publik agar penandatangan bisa membacanya.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Pilih Penandatangan <span class="text-red-500">*</span></label>
+                            <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl max-h-60 overflow-y-auto space-y-2" id="cs-pengurus-list">
+                                <!-- Checkbox list di-generate via JS -->
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-100 flex justify-end gap-3">
+                            <button type="button" onclick="navigateAdmin('surat')" class="px-5 py-2.5 rounded-xl font-medium text-slate-600 bg-slate-100 hover:bg-slate-200">Batal</button>
+                            <button type="submit" class="px-6 py-2.5 rounded-xl font-medium text-white bg-primary hover:bg-primaryDark shadow-md flex items-center gap-2">
+                                <i class="fa-solid fa-paper-plane"></i> Proses Surat
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- View: Detail Surat -->
+                <div id="view-surat-detail" class="admin-view hidden space-y-6">
+                    <!-- Header -->
+                    <div class="flex items-center gap-3">
+                        <button onclick="navigateAdmin('surat')" class="w-10 h-10 flex items-center justify-center bg-white rounded-xl shadow-sm text-slate-500 hover:text-primary">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                        <h2 class="text-2xl font-bold text-slate-800">Detail Surat</h2>
+                    </div>
+
+                    <!-- Info Card -->
+                    <div class="glass p-6 rounded-2xl">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <span id="ds-status" class="px-3 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-600 mb-2 inline-block">Menunggu</span>
+                                <h3 id="ds-no" class="font-bold text-xl text-slate-800">NO SURAT</h3>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="openEditSurat()" class="bg-blue-100 text-blue-600 w-10 h-10 rounded-xl flex items-center justify-center hover:bg-blue-200 tooltip" title="Edit Surat">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                <button onclick="deleteSurat()" class="bg-red-100 text-red-600 w-10 h-10 rounded-xl flex items-center justify-center hover:bg-red-200 tooltip" title="Hapus Surat">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                                <button onclick="showQRCode()" class="bg-slate-800 text-white w-10 h-10 rounded-xl flex items-center justify-center hover:bg-slate-700 tooltip" title="QR Code Validasi">
+                                    <i class="fa-solid fa-qrcode"></i>
+                                </button>
+                                <button onclick="copyPublicVerifyLink()" class="bg-blue-100 text-blue-600 w-10 h-10 rounded-xl flex items-center justify-center hover:bg-blue-200 tooltip" title="Copy Link Validasi">
+                                    <i class="fa-solid fa-link"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-600">
+                            <p><i class="fa-regular fa-calendar mr-2 w-4"></i> <span id="ds-tgl">Tanggal</span></p>
+                            <p><i class="fa-solid fa-align-left mr-2 w-4"></i> <span id="ds-ket">Keterangan</span></p>
+                            <p class="md:col-span-2"><i class="fa-solid fa-file-lines mr-2 w-4"></i> <a id="ds-link" href="#" target="_blank" class="text-primary hover:underline font-medium">Lihat Dokumen Asli</a></p>
+                        </div>
+                    </div>
+
+                    <!-- Daftar Penandatangan -->
+                    <h3 class="font-bold text-lg text-slate-800 mt-6 mb-3">Status Penandatangan</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="ds-ttd-list">
+                        <!-- TTD Items injected by JS -->
+                    </div>
+                </div>
+
+                <!-- View: Data Pengurus -->
+                <div id="view-pengurus" class="admin-view hidden space-y-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800">Data Pengurus</h2>
+                            <p class="text-slate-500">Kelola data penandatangan surat.</p>
+                        </div>
+                        <button onclick="openModalPengurus()" class="bg-primary text-white px-4 py-2 rounded-xl font-medium shadow-md hover:bg-primaryDark flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-user-plus"></i> Tambah Pengurus
+                        </button>
+                    </div>
+
+                    <div class="glass p-4 rounded-2xl relative">
+                        <i class="fa-solid fa-search absolute left-7 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="search-pengurus" onkeyup="renderPengurusList()" placeholder="Cari Nama atau Jabatan..." class="w-full pl-12 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-primary text-sm">
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm whitespace-nowrap">
+                                <thead class="bg-slate-50 border-b border-slate-200 text-slate-600">
+                                    <tr>
+                                        <th class="px-6 py-4 font-medium">Nama Lengkap</th>
+                                        <th class="px-6 py-4 font-medium">Jabatan / Divisi</th>
+                                        <th class="px-6 py-4 font-medium">Kontak (WA)</th>
+                                        <th class="px-6 py-4 font-medium text-right">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100" id="pengurus-table-body">
+                                    <!-- List diisi via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Mobile Bottom Nav -->
+        <nav class="md:hidden glass-primary fixed bottom-0 left-0 w-full z-40 pb-safe">
+            <div class="flex justify-around p-2">
+                <a href="#" onclick="navigateAdmin('dashboard')" id="nav-mobile-dashboard" class="nav-item-mobile flex flex-col items-center p-2 rounded-xl text-slate-500 min-w-[64px]">
+                    <i class="fa-solid fa-house text-xl mb-1"></i>
+                    <span class="text-[10px] font-medium">Home</span>
+                </a>
+                <a href="#" onclick="navigateAdmin('surat')" id="nav-mobile-surat" class="nav-item-mobile flex flex-col items-center p-2 rounded-xl text-slate-500 min-w-[64px]">
+                    <i class="fa-solid fa-file-signature text-xl mb-1"></i>
+                    <span class="text-[10px] font-medium">Surat</span>
+                </a>
+                <a href="#" onclick="navigateAdmin('pengurus')" id="nav-mobile-pengurus" class="nav-item-mobile flex flex-col items-center p-2 rounded-xl text-slate-500 min-w-[64px]">
+                    <i class="fa-solid fa-users text-xl mb-1"></i>
+                    <span class="text-[10px] font-medium">Pengurus</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- MODAL: Form Pengurus -->
+    <div id="modal-pengurus" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass w-full max-w-md rounded-2xl shadow-2xl p-6 relative">
+            <button onclick="closeModalPengurus()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-xl font-bold text-slate-800 mb-5" id="modal-pengurus-title">Tambah Pengurus</h3>
+            
+            <form id="form-pengurus" class="space-y-4">
+                <input type="hidden" id="p-id">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap</label>
+                    <input type="text" id="p-nama" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Jabatan / Divisi</label>
+                    <input type="text" id="p-jabatan" required placeholder="Ketua, Sekretaris, dll" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">No. WhatsApp</label>
+                    <input type="text" id="p-kontak" required placeholder="08..." class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none">
+                </div>
+                <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white font-medium py-2.5 rounded-xl mt-2">Simpan Data</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: QR Code -->
+    <div id="modal-qr" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass w-full max-w-sm rounded-3xl shadow-2xl p-8 text-center relative flex flex-col items-center">
+            <button onclick="closeQRCode()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="font-bold text-lg text-slate-800 mb-2">QR Code Validasi</h3>
+            <p class="text-xs text-slate-500 mb-6">Scan untuk mengecek keaslian dokumen</p>
+            
+            <div class="bg-white p-4 rounded-2xl shadow-inner mb-6 inline-block">
+                <div id="qrcode-container"></div>
+            </div>
+            
+            <button onclick="copyPublicVerifyLink()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 rounded-xl flex items-center justify-center gap-2">
+                <i class="fa-solid fa-copy"></i> Salin Link Validasi
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL: Edit Surat -->
+    <div id="modal-edit-surat" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass w-full max-w-md rounded-2xl shadow-2xl p-6 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeModalEditSurat()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-xl font-bold text-slate-800 mb-5">Edit Surat</h3>
+
+            <form id="form-edit-surat" class="space-y-4">
+                <input type="hidden" id="es-id">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Nomor Surat</label>
+                    <input type="text" id="es-no" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Tanggal Surat</label>
+                    <input type="date" id="es-tgl" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Keterangan / Perihal</label>
+                    <input type="text" id="es-ket" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Link Dokumen</label>
+                    <input type="url" id="es-link" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none">
+                </div>
+                <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white font-medium py-2.5 rounded-xl mt-2">Simpan Perubahan</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. PUBLIC SCREEN (E-Sign & Verify) -->
+    <div id="public-screen" class="min-h-screen w-full bg-slate-50 p-4 md:p-8 flex justify-center items-start overflow-y-auto">
+        <div class="w-full max-w-2xl mt-4 md:mt-10">
+            
+            <!-- Branding Publik -->
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 bg-primary rounded-xl mx-auto flex items-center justify-center shadow-md mb-3">
+                    <i class="fa-solid fa-signature text-xl text-white"></i>
+                </div>
+                <h1 class="text-xl font-bold text-slate-800">Dtar E-Signature</h1>
+            </div>
+
+            <!-- PUBLIC VIEW: SIGNATURE -->
+            <div id="public-view-sign" class="glass rounded-3xl p-6 shadow-xl hidden">
+                <div class="border-b border-slate-200 pb-4 mb-4 text-center">
+                    <span class="bg-orange-100 text-orange-600 text-xs font-bold px-3 py-1 rounded-full mb-2 inline-block">Permintaan Tanda Tangan</span>
+                    <h2 class="text-xl font-bold text-slate-800 mt-2" id="pub-sign-nama">Halo, [Nama]</h2>
+                    <p class="text-sm text-slate-500">Anda diminta untuk menandatangani dokumen berikut sebagai <span class="font-semibold text-slate-700" id="pub-sign-jabatan">Jabatan</span>.</p>
+                </div>
+
+                <div class="bg-white rounded-xl p-4 border border-slate-100 mb-5">
+                    <div class="grid grid-cols-3 gap-2 text-sm mb-2">
+                        <div class="col-span-1 text-slate-500">No. Surat</div>
+                        <div class="col-span-2 font-medium text-slate-800" id="pub-sign-nosurat">-</div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-sm mb-4">
+                        <div class="col-span-1 text-slate-500">Perihal</div>
+                        <div class="col-span-2 font-medium text-slate-800" id="pub-sign-ket">-</div>
+                    </div>
+                    
+                    <!-- NEW BUTTON ADDED HERE -->
+                    <a id="pub-sign-btn-doc" href="#" target="_blank" class="block w-full text-center bg-blue-50 hover:bg-blue-100 text-blue-600 font-medium py-2 rounded-lg border border-blue-200 transition-colors">
+                        <i class="fa-solid fa-file-pdf mr-1"></i> Download / Lihat Dokumen
+                    </a>
+                </div>
+
+                <div id="signature-section">
+                    <p class="text-sm font-medium text-slate-700 mb-2 text-center">Silakan gambar tanda tangan Anda di kotak ini:</p>
+                    <div class="signature-pad-wrapper mb-2">
+                        <canvas id="signature-pad"></canvas>
+                    </div>
+                    <div class="flex justify-end mb-6">
+                        <button onclick="clearSignature()" class="text-xs text-red-500 hover:text-red-700 font-medium"><i class="fa-solid fa-eraser"></i> Bersihkan Canvas</button>
+                    </div>
+
+                    <button onclick="submitSignature()" class="w-full bg-primary hover:bg-primaryDark text-white font-bold py-3.5 rounded-xl shadow-lg transition-all active:scale-95 text-lg">
+                        <i class="fa-solid fa-check-circle mr-2"></i> TANDA TANGANI SEKARANG
+                    </button>
+                </div>
+
+                <div id="signature-done-msg" class="hidden text-center py-8">
+                    <div class="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800">Terima Kasih!</h3>
+                    <p class="text-slate-500 mt-2">Anda telah berhasil menandatangani dokumen ini.</p>
+                </div>
+            </div>
+
+            <!-- PUBLIC VIEW: VERIFY -->
+            <div id="public-view-verify" class="glass rounded-3xl p-6 shadow-xl hidden">
+                <div class="text-center mb-6">
+                    <div class="inline-flex items-center justify-center w-12 h-12 bg-green-100 text-green-500 rounded-full mb-3">
+                        <i class="fa-solid fa-shield-check text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800">Validasi Dokumen</h2>
+                    <p class="text-sm text-slate-500">Bukti keabsahan tanda tangan elektronik.</p>
+                </div>
+
+                <div class="bg-white rounded-xl p-5 border border-slate-100 mb-6 shadow-sm">
+                    <table class="w-full text-sm">
+                        <tbody>
+                            <tr class="border-b border-slate-50"><td class="py-2 text-slate-500 w-1/3">Status</td><td class="py-2 font-bold" id="pub-ver-status"></td></tr>
+                            <tr class="border-b border-slate-50"><td class="py-2 text-slate-500">No. Surat</td><td class="py-2 font-medium text-slate-800" id="pub-ver-no"></td></tr>
+                            <tr class="border-b border-slate-50"><td class="py-2 text-slate-500">Tanggal</td><td class="py-2 font-medium text-slate-800" id="pub-ver-tgl"></td></tr>
+                            <tr><td class="py-2 text-slate-500">Perihal</td><td class="py-2 font-medium text-slate-800" id="pub-ver-ket"></td></tr>
+                        </tbody>
+                    </table>
+                    
+                    <a id="pub-ver-btn-doc" href="#" target="_blank" class="mt-4 flex items-center justify-center w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 rounded-lg transition-colors">
+                        <i class="fa-solid fa-download mr-2"></i> Download / Lihat Dokumen Asli
+                    </a>
+                </div>
+
+                <h3 class="font-bold text-slate-800 mb-3 border-b border-slate-200 pb-2">Daftar Penandatangan</h3>
+                <div class="space-y-3" id="pub-ver-ttd-list">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC & FIREBASE -->
+    <script type="module">
+        // ==========================================
+        // 1. KONFIGURASI APLIKASI & FIREBASE
+        // ==========================================
+        const IS_PREVIEW = false; // SAKLAR DEPLOYMENT: Set 'false' jika firebaseConfig sudah diisi asli
+
+        // PASTE FIREBASE CONFIG ANDA DI SINI
+        const firebaseConfig = {
+  apiKey: "AIzaSyDRdw13KLCyqTVsqodcVTr16C55JjrFyd8",
+  authDomain: "tte-dtar.firebaseapp.com",
+  projectId: "tte-dtar",
+  storageBucket: "tte-dtar.firebasestorage.app",
+  messagingSenderId: "507372950607",
+  appId: "1:507372950607:web:30c70e06bb89189035463a"
+        };
+
+        // Firebase Imports (Modular SDK)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Initialize
+        let app, auth, db;
+        if (!IS_PREVIEW) {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+        } else {
+            // Mocking for IS_PREVIEW = true (Local Sandbox Mode)
+            console.warn("MENJALANKAN MODE PREVIEW (TANPA DATABASE). SET IS_PREVIEW=false UNTUK LIVE.");
+            mockFirebaseEngine();
+        }
+
+        // Global Variables
+        let currentAdminUser = null;
+        let signaturePad = null;
+        let globalSuratIdForDetail = null;
+
+        // ==========================================
+        // 2. AUTO SETUP DATABASE PWA & ROUTING
+        // ==========================================
+        
+        // Dynamic PWA Setup
+        const manifestData = {
+            name: "Dtar E-Signature", short_name: "DtarSign", start_url: "./", display: "standalone",
+            background_color: "#f8fafc", theme_color: "#f97316",
+            icons: [{ src: "https://via.placeholder.com/192x192.png/f97316/ffffff?text=DS", sizes: "192x192", type: "image/png" },
+                    { src: "https://via.placeholder.com/512x512.png/f97316/ffffff?text=DS", sizes: "512x512", type: "image/png" }]
+        };
+        const manifestString = encodeURIComponent(JSON.stringify(manifestData));
+        document.getElementById('pwa-manifest').setAttribute('href', 'data:application/json;charset=utf-8,' + manifestString);
+
+        // Dynamic Service Worker
+        const swCode = `
+            self.addEventListener('install', (e) => { e.waitUntil(self.skipWaiting()); });
+            self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });
+            self.addEventListener('fetch', (e) => { }); // Passthrough fetch
+        `;
+        const swBlob = new Blob([swCode], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(swBlob);
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register(swUrl).catch(err => console.log('SW Reg Failed:', err)); }
+
+document.addEventListener('DOMContentLoaded', async () => { const urlParams = new URLSearchParams(window.location.search); const signToken = urlParams.get('sign'); const verifyToken = urlParams.get('verify'); /* * PUBLIC ROUTE * Prioritaskan parameter publik terlebih dahulu. * Tidak perlu menunggu auth Firebase. */ if (signToken) { await initPublicSign(signToken); return; } if (verifyToken) { await initPublicVerify(verifyToken); return; } /* * ADMIN ROUTE */ if (!IS_PREVIEW) { onAuthStateChanged(auth, async (user) => { if (user) { currentAdminUser = user; await autoSetupDatabase(); showAdminLayout(); } else { showLoginScreen(); } }); } else { showLoginScreen(); } });
+
+        async function autoSetupDatabase() {
+            showLoader("Menyiapkan Data Awal...");
+            try {
+                const q = collection(db, "pengurus");
+                const snapshot = await getDocs(q);
+                if (snapshot.empty) {
+                    // Injeksi data dummy telah dihapus. Database siap dimulai dengan bersih.
+                    showToast("Sistem siap digunakan!");
+                }
+            } catch(e) { console.error("Setup DB error:", e); }
+            hideLoader();
+        }
+
+        // ==========================================
+        // 3. UI UTILITIES
+        // ==========================================
+        window.showLoader = (text = "Memuat...") => { document.getElementById('loader-text').innerText = text; document.getElementById('global-loader').classList.remove('hidden'); }
+        window.hideLoader = () => { document.getElementById('global-loader').classList.add('hidden'); }
+        window.showToast = (msg, isError = false) => {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.className = `fixed top-5 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-full shadow-lg z-[100] transition-all duration-300 font-medium text-sm text-white text-center min-w-[200px] ${isError ? 'bg-red-500' : 'bg-green-500'}`;
+            setTimeout(() => { t.classList.add('opacity-0'); t.classList.remove('top-5'); setTimeout(()=>{ t.classList.add('hidden'); t.classList.remove('opacity-0'); }, 300); }, 3000);
+        }
+
+function hideAllScreens() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-layout').style.display = 'none';
+    document.getElementById('public-screen').style.display = 'none';
+}
+
+function showLoginScreen() { hideAllScreens(); document.getElementById('login-screen').style.display = 'flex'; }
+
+function showAdminLayout() { 
+    hideAllScreens(); 
+    document.getElementById('admin-layout').style.display = 'flex';
+    window.navigateAdmin('dashboard'); // Default view
+}
+
+        // ==========================================
+        // 4. ADMIN FEATURES (LOGIN, ROUTING, DASHBOARD)
+        // ==========================================
+        
+        // Login Logic
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-password').value;
+            showLoader("Mencoba masuk...");
+            
+            if (IS_PREVIEW) {
+                setTimeout(() => { 
+                    hideLoader();
+                    if(email === 'admin@dtar.com' && pass === 'admin123') { currentAdminUser = {email: email}; showAdminLayout(); showToast("Berhasil masuk (Preview)"); }
+                    else { showToast("Gunakan admin@dtar.com / admin123 (Mode Preview)", true); }
+                }, 1000);
+                return;
+            }
+
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+                hideLoader();
+                // onAuthStateChanged will handle the rest
+            } catch(error) {
+                hideLoader(); showToast("Login gagal. Cek kredensial.", true);
+            }
+        });
+
+        window.logoutApp = async () => {
+            if(!IS_PREVIEW) await signOut(auth);
+            else currentAdminUser = null;
+            showLoginScreen();
+        }
+
+        window.navigateAdmin = async (viewName) => {
+            // UI Tab Active State Update
+            document.querySelectorAll('.nav-item').forEach(el => { el.classList.remove('bg-orange-50', 'text-primary'); el.classList.add('text-slate-500'); });
+            document.querySelectorAll('.nav-item-mobile').forEach(el => { el.classList.remove('text-primary'); el.classList.add('text-slate-500'); });
+            
+            const deskNav = document.getElementById('nav-desktop-' + viewName);
+            const mobNav = document.getElementById('nav-mobile-' + viewName);
+            if(deskNav) { deskNav.classList.remove('text-slate-500'); deskNav.classList.add('bg-orange-50', 'text-primary'); }
+            if(mobNav) { mobNav.classList.remove('text-slate-500'); mobNav.classList.add('text-primary'); }
+
+            // Hide all admin views
+            document.querySelectorAll('.admin-view').forEach(el => el.classList.add('hidden'));
+            document.getElementById('view-' + viewName).classList.remove('hidden');
+
+            // Load Data based on view
+            if(viewName === 'dashboard') loadDashboard();
+            if(viewName === 'pengurus') renderPengurusList();
+            if(viewName === 'surat') renderSuratList();
+        }
+
+        async function loadDashboard() {
+            if(IS_PREVIEW) {
+                document.getElementById('stat-total').innerText = MOCK_DB.surat.length;
+                document.getElementById('stat-pending').innerText = MOCK_DB.surat.filter(s=>s.status==='Menunggu').length;
+                document.getElementById('stat-selesai').innerText = MOCK_DB.surat.filter(s=>s.status==='Selesai').length;
+                return;
+            }
+            try {
+                const snap = await getDocs(collection(db, "surat"));
+                let total = 0, pending = 0, selesai = 0;
+                snap.forEach(doc => { total++; if(doc.data().status === 'Menunggu') pending++; else selesai++; });
+                document.getElementById('stat-total').innerText = total;
+                document.getElementById('stat-pending').innerText = pending;
+                document.getElementById('stat-selesai').innerText = selesai;
+            } catch(e) {}
+        }
+
+        // ==========================================
+        // 5. MANAJEMEN PENGURUS
+        // ==========================================
+        window.openModalPengurus = (id='', nama='', jabatan='', kontak='') => {
+            document.getElementById('p-id').value = id;
+            document.getElementById('p-nama').value = nama;
+            document.getElementById('p-jabatan').value = jabatan;
+            document.getElementById('p-kontak').value = kontak;
+            document.getElementById('modal-pengurus-title').innerText = id ? "Edit Pengurus" : "Tambah Pengurus";
+            document.getElementById('modal-pengurus').classList.remove('hidden');
+        }
+        window.closeModalPengurus = () => document.getElementById('modal-pengurus').classList.add('hidden');
+
+        document.getElementById('form-pengurus').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('p-id').value;
+            const data = {
+                namaLengkap: document.getElementById('p-nama').value,
+                jabatan: document.getElementById('p-jabatan').value,
+                kontak: document.getElementById('p-kontak').value
+            };
+            
+            showLoader("Menyimpan...");
+            if(IS_PREVIEW) {
+                if(id) { const i = MOCK_DB.pengurus.findIndex(p=>p.id===id); if(i>-1) MOCK_DB.pengurus[i] = {...data, id}; }
+                else { MOCK_DB.pengurus.push({...data, id: Date.now().toString()}); }
+            } else {
+                try {
+                    if(id) await updateDoc(doc(db, "pengurus", id), data);
+                    else await addDoc(collection(db, "pengurus"), data);
+                } catch(e) { showToast("Gagal menyimpan", true); hideLoader(); return; }
+            }
+            hideLoader(); closeModalPengurus(); showToast("Berhasil disimpan!"); renderPengurusList();
+        });
+
+        window.deletePengurus = async (id) => {
+            if(!confirm("Hapus pengurus ini?")) return;
+            showLoader("Menghapus...");
+            if(IS_PREVIEW) { MOCK_DB.pengurus = MOCK_DB.pengurus.filter(p=>p.id!==id); }
+            else { await deleteDoc(doc(db, "pengurus", id)); }
+            hideLoader(); showToast("Dihapus!"); renderPengurusList();
+        }
+
+        window.renderPengurusList = async () => {
+            const tbody = document.getElementById('pengurus-table-body');
+            const search = document.getElementById('search-pengurus').value.toLowerCase();
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-slate-400"><i class="fa-solid fa-spinner fa-spin"></i> Memuat...</td></tr>';
+            
+            let list = [];
+            if(IS_PREVIEW) { list = [...MOCK_DB.pengurus]; }
+            else {
+                const snap = await getDocs(collection(db, "pengurus"));
+                snap.forEach(d => list.push({id: d.id, ...d.data()}));
+            }
+
+            list = list.filter(p => p.namaLengkap.toLowerCase().includes(search) || p.jabatan.toLowerCase().includes(search));
+            
+            if(list.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-slate-500">Tidak ada data.</td></tr>'; return; }
+            
+            tbody.innerHTML = list.map(p => `
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-orange-100 text-primary flex items-center justify-center font-bold text-xs">${p.namaLengkap.charAt(0)}</div>
+                            <span class="font-medium text-slate-800">${p.namaLengkap}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-slate-600">${p.jabatan}</td>
+                    <td class="px-6 py-4 text-slate-600">${p.kontak}</td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="openModalPengurus('${p.id}','${p.namaLengkap}','${p.jabatan}','${p.kontak}')" class="text-blue-500 hover:bg-blue-50 p-2 rounded-lg mr-1"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deletePengurus('${p.id}')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // ==========================================
+        // 6. MANAJEMEN SURAT
+        // ==========================================
+        window.renderSuratList = async () => {
+            const container = document.getElementById('surat-list-container');
+            const search = document.getElementById('search-surat').value.toLowerCase();
+            const filter = document.getElementById('filter-surat').value;
+            const sortOrder = document.getElementById('sort-surat').value;
+            container.innerHTML = '<div class="text-center py-8 text-slate-400"><i class="fa-solid fa-spinner fa-spin text-2xl"></i></div>';
+            
+            let list = [];
+            if(IS_PREVIEW) { list = [...MOCK_DB.surat]; }
+            else {
+                const snap = await getDocs(collection(db, "surat")); // For prod, better to use orderBy and limit, but client-side app assumes small data
+                snap.forEach(d => list.push({id: d.id, ...d.data()}));
+            }
+
+            list = list.filter(s => {
+                const matchSearch = s.nomorSurat.toLowerCase().includes(search) || s.keterangan.toLowerCase().includes(search);
+                const matchFilter = filter === 'all' ? true : s.status === filter;
+                return matchSearch && matchFilter;
+            });
+            
+            // Logika Sorting Terbaru/Terlama
+            list.sort((a, b) => {
+                const timeA = typeof a.createdAt === 'object' && a.createdAt !== null ? (a.createdAt.toMillis ? a.createdAt.toMillis() : 0) : (a.createdAt || 0);
+                const timeB = typeof b.createdAt === 'object' && b.createdAt !== null ? (b.createdAt.toMillis ? b.createdAt.toMillis() : 0) : (b.createdAt || 0);
+                return sortOrder === 'terbaru' ? timeB - timeA : timeA - timeB;
+            });
+            
+            if(list.length === 0) { container.innerHTML = '<div class="text-center py-8 text-slate-500 bg-white rounded-2xl border border-slate-200">Tidak ada surat ditemukan.</div>'; return; }
+            
+            container.innerHTML = list.map(s => `
+                <div class="glass p-5 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-l-4 ${s.status==='Selesai'?'border-green-500':'border-orange-400'} transition-transform hover:-translate-y-1">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${s.status==='Selesai'?'bg-green-100 text-green-600':'bg-orange-100 text-orange-600'} uppercase tracking-wider">${s.status}</span>
+                            <span class="text-xs text-slate-400"><i class="fa-regular fa-calendar mr-1"></i> ${s.tanggal}</span>
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-lg">${s.nomorSurat}</h4>
+                        <p class="text-sm text-slate-500 mt-1 line-clamp-1">${s.keterangan}</p>
+                    </div>
+                    <button onclick="showDetailSurat('${s.id}')" class="w-full md:w-auto px-5 py-2 rounded-xl text-primary bg-orange-50 hover:bg-primary hover:text-white transition-colors font-medium border border-orange-100">
+                        Lihat Detail <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        window.showCreateSurat = async () => {
+            // Load pengurus options
+            const pList = document.getElementById('cs-pengurus-list');
+            pList.innerHTML = '<p class="text-xs text-slate-400">Memuat...</p>';
+            
+            let pengurus = [];
+            if(IS_PREVIEW) { pengurus = [...MOCK_DB.pengurus]; }
+            else {
+                const snap = await getDocs(collection(db, "pengurus"));
+                snap.forEach(d => pengurus.push({id: d.id, ...d.data()}));
+            }
+            
+            if(pengurus.length === 0) pList.innerHTML = '<p class="text-sm text-red-500">Data Pengurus kosong. Tambahkan pengurus terlebih dahulu.</p>';
+            else {
+                pList.innerHTML = pengurus.map(p => `
+                    <label class="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-lg cursor-pointer hover:border-primary transition-colors">
+                        <input type="checkbox" name="cs-penandatangan" value="${p.id}" data-nama="${p.namaLengkap}" data-jabatan="${p.jabatan}" class="w-4 h-4 text-primary rounded focus:ring-primary">
+                        <div>
+                            <p class="font-medium text-slate-700 text-sm">${p.namaLengkap}</p>
+                            <p class="text-xs text-slate-400">${p.jabatan}</p>
+                        </div>
+                    </label>
+                `).join('');
+            }
+            
+            // Reset Form
+            document.getElementById('form-create-surat').reset();
+            // Show View
+            document.querySelectorAll('.admin-view').forEach(el => el.classList.add('hidden'));
+            document.getElementById('view-surat-create').classList.remove('hidden');
+        }
+
+        document.getElementById('form-create-surat').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const checked = document.querySelectorAll('input[name="cs-penandatangan"]:checked');
+            if(checked.length === 0) { showToast("Pilih minimal 1 penandatangan!", true); return; }
+
+            const suratData = {
+                nomorSurat: document.getElementById('cs-no').value,
+                tanggal: document.getElementById('cs-tgl').value,
+                keterangan: document.getElementById('cs-ket').value,
+                linkDokumen: document.getElementById('cs-link').value,
+                status: 'Menunggu',
+                createdAt: IS_PREVIEW ? Date.now() : serverTimestamp()
+            };
+
+            showLoader("Membuat Surat & Link TTD...");
+            try {
+                let suratId;
+                if(IS_PREVIEW) {
+                    suratId = 'SRT_' + Date.now();
+                    MOCK_DB.surat.push({...suratData, id: suratId});
+                } else {
+                    const sRef = await addDoc(collection(db, "surat"), suratData);
+                    suratId = sRef.id;
+                }
+
+                // Create Tugas TTD
+                for (let box of checked) {
+                    const tugasData = {
+                        suratId: suratId,
+                        pengurusId: box.value,
+                        namaPengurus: box.getAttribute('data-nama'),
+                        jabatanPengurus: box.getAttribute('data-jabatan'),
+                        status: 'Pending',
+                        gambarTTD: null
+                    };
+                    if(IS_PREVIEW) { MOCK_DB.tugas_ttd.push({...tugasData, id: 'TGS_'+Date.now()+Math.random()}); }
+                    else { await addDoc(collection(db, "tugas_ttd"), tugasData); }
+                }
+
+                hideLoader(); showToast("Surat berhasil dibuat!");
+                navigateAdmin('surat');
+            } catch(error) {
+                hideLoader(); showToast("Gagal membuat surat.", true); console.error(error);
+            }
+        });
+
+        window.showDetailSurat = async (id) => {
+            globalSuratIdForDetail = id;
+            showLoader("Memuat detail...");
+            let surat = null, tugas = [];
+            
+            if(IS_PREVIEW) {
+                surat = MOCK_DB.surat.find(s=>s.id===id);
+                tugas = MOCK_DB.tugas_ttd.filter(t=>t.suratId===id);
+            } else {
+                const sDoc = await getDoc(doc(db, "surat", id));
+                if(sDoc.exists()) surat = {id: sDoc.id, ...sDoc.data()};
+                
+                const q = query(collection(db, "tugas_ttd"), where("suratId", "==", id));
+                const tSnap = await getDocs(q);
+                tSnap.forEach(d => tugas.push({id: d.id, ...d.data()}));
+            }
+            hideLoader();
+
+            if(!surat) return showToast("Surat tidak ditemukan", true);
+
+            // Populate Info
+            document.getElementById('ds-no').innerText = surat.nomorSurat;
+            document.getElementById('ds-tgl').innerText = surat.tanggal;
+            document.getElementById('ds-ket').innerText = surat.keterangan;
+            document.getElementById('ds-link').href = surat.linkDokumen;
+            const stEl = document.getElementById('ds-status');
+            stEl.innerText = surat.status;
+            stEl.className = `px-3 py-1 rounded-full text-xs font-bold mb-2 inline-block ${surat.status==='Selesai'?'bg-green-100 text-green-600':'bg-orange-100 text-orange-600'}`;
+
+            // Populate TTD List
+            const listEl = document.getElementById('ds-ttd-list');
+            listEl.innerHTML = tugas.map(t => {
+                const isSigned = t.status === 'Signed';
+                const link = `${window.location.origin}${window.location.pathname}?sign=${t.id}`;
+                
+                // Teks pengantar untuk WhatsApp
+                const waText = encodeURIComponent(`Halo Bapak/Ibu ${t.namaPengurus},\n\nMohon kesediaannya untuk menandatangani dokumen surat secara digital sebagai ${t.jabatanPengurus}.\n\nSilakan klik tautan berikut untuk melihat dan menandatangani dokumen:\n${link}\n\nTerima kasih.`);
+                
+                return `
+                <div class="bg-white border border-slate-100 rounded-2xl p-4 flex flex-col justify-between shadow-sm relative overflow-hidden">
+                    ${isSigned ? `<div class="absolute top-0 right-0 w-16 h-16 bg-green-50 rounded-bl-full z-0"></div><i class="fa-solid fa-check text-green-400 absolute top-3 right-3 z-0"></i>` : ''}
+                    <div class="relative z-10">
+                        <p class="font-bold text-slate-800">${t.namaPengurus}</p>
+                        <p class="text-xs text-slate-500 mb-3">${t.jabatanPengurus}</p>
+                        ${isSigned ? 
+                            `<div class="border border-dashed border-slate-200 rounded-lg p-2 bg-slate-50 flex items-center justify-center h-20 mb-2">
+                                <img src="${t.gambarTTD}" class="max-h-full object-contain">
+                             </div>
+                             <span class="text-xs font-medium text-green-600"><i class="fa-solid fa-check-circle mr-1"></i> Telah Ditandatangani</span>
+                             <p class="text-[10px] text-slate-400 mt-1"><i class="fa-regular fa-clock mr-1"></i> ${formatTanggalTTD(t.signedAt)}</p>` 
+                            : 
+                            `<div class="flex items-center gap-2 mb-2"><span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span> <span class="text-xs text-orange-500 font-medium">Menunggu Tanda Tangan</span></div>
+                             <div class="flex gap-2">
+                                 <button onclick="copyToClipboard('${link}')" class="flex-1 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg font-medium transition-colors flex items-center justify-center">
+                                    <i class="fa-solid fa-copy mr-1"></i> Copy
+                                 </button>
+                                 <a href="https://api.whatsapp.com/send?text=${waText}" target="_blank" class="flex-1 text-xs bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-medium transition-colors flex items-center justify-center">
+                                    <i class="fa-brands fa-whatsapp mr-1 text-sm"></i> Share WA
+                                 </a>
+                             </div>`
+                        }
+                    </div>
+                </div>
+                `;
+            }).join('');
+
+            // Show View
+            document.querySelectorAll('.admin-view').forEach(el => el.classList.add('hidden'));
+            document.getElementById('view-surat-detail').classList.remove('hidden');
+        }
+
+        // Utils for Share/Copy
+        window.copyToClipboard = (text) => {
+            navigator.clipboard.writeText(text).then(()=>{ showToast("Link disalin!"); }).catch(()=>{showToast("Gagal salin link", true)});
+        }
+        
+        window.getPublicVerifyLink = () => { return `${window.location.origin}${window.location.pathname}?verify=${globalSuratIdForDetail}`; }
+        window.copyPublicVerifyLink = () => { copyToClipboard(getPublicVerifyLink()); }
+        
+        window.showQRCode = () => {
+            document.getElementById('qrcode-container').innerHTML = ''; // Clear old
+            new QRCode(document.getElementById('qrcode-container'), {
+                text: window.getPublicVerifyLink(),
+                width: 200, height: 200,
+                colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
+            });
+            document.getElementById('modal-qr').classList.remove('hidden');
+        }
+        window.closeQRCode = () => { document.getElementById('modal-qr').classList.add('hidden'); }
+
+        // Format tanggal TTD (mendukung Firestore Timestamp maupun angka ms mode preview)
+        window.formatTanggalTTD = (ts) => {
+            if(!ts) return '-';
+            let d;
+            if(typeof ts === 'object' && ts !== null && typeof ts.toDate === 'function') { d = ts.toDate(); }
+            else { d = new Date(ts); }
+            if(isNaN(d.getTime())) return '-';
+            return d.toLocaleString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Edit Surat
+        window.openEditSurat = async () => {
+            if(!globalSuratIdForDetail) return;
+            let surat = null;
+            if(IS_PREVIEW) { surat = MOCK_DB.surat.find(s=>s.id===globalSuratIdForDetail); }
+            else { const sDoc = await getDoc(doc(db, "surat", globalSuratIdForDetail)); if(sDoc.exists()) surat = {id: sDoc.id, ...sDoc.data()}; }
+            if(!surat) return showToast("Surat tidak ditemukan", true);
+
+            document.getElementById('es-id').value = surat.id;
+            document.getElementById('es-no').value = surat.nomorSurat;
+            document.getElementById('es-tgl').value = surat.tanggal;
+            document.getElementById('es-ket').value = surat.keterangan;
+            document.getElementById('es-link').value = surat.linkDokumen;
+            document.getElementById('modal-edit-surat').classList.remove('hidden');
+        }
+        window.closeModalEditSurat = () => document.getElementById('modal-edit-surat').classList.add('hidden');
+
+        document.getElementById('form-edit-surat').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('es-id').value;
+            const data = {
+                nomorSurat: document.getElementById('es-no').value,
+                tanggal: document.getElementById('es-tgl').value,
+                keterangan: document.getElementById('es-ket').value,
+                linkDokumen: document.getElementById('es-link').value
+            };
+            showLoader("Menyimpan perubahan...");
+            if(IS_PREVIEW) {
+                const i = MOCK_DB.surat.findIndex(s=>s.id===id);
+                if(i>-1) MOCK_DB.surat[i] = {...MOCK_DB.surat[i], ...data};
+            } else {
+                try { await updateDoc(doc(db, "surat", id), data); }
+                catch(e) { showToast("Gagal menyimpan perubahan", true); hideLoader(); return; }
+            }
+            hideLoader(); closeModalEditSurat(); showToast("Surat berhasil diperbarui!");
+            showDetailSurat(id);
+        });
+
+        // Hapus Surat (beserta seluruh tugas TTD terkait)
+        window.deleteSurat = async () => {
+            if(!globalSuratIdForDetail) return;
+            if(!confirm("Hapus surat ini beserta seluruh data tanda tangannya? Tindakan ini tidak dapat dibatalkan.")) return;
+            const id = globalSuratIdForDetail;
+            showLoader("Menghapus surat...");
+            try {
+                if(IS_PREVIEW) {
+                    MOCK_DB.surat = MOCK_DB.surat.filter(s=>s.id!==id);
+                    MOCK_DB.tugas_ttd = MOCK_DB.tugas_ttd.filter(t=>t.suratId!==id);
+                } else {
+                    const q = query(collection(db, "tugas_ttd"), where("suratId", "==", id));
+                    const snap = await getDocs(q);
+                    for (const d of snap.docs) { await deleteDoc(doc(db, "tugas_ttd", d.id)); }
+                    await deleteDoc(doc(db, "surat", id));
+                }
+                hideLoader(); showToast("Surat berhasil dihapus!");
+                navigateAdmin('surat');
+            } catch(e) { hideLoader(); showToast("Gagal menghapus surat", true); console.error(e); }
+        }
+
+        // ==========================================
+        // 7. PUBLIC FRONTEND (E-SIGNATURE)
+        // ==========================================
+        let currentTugasToken = null;
+        let signSuratId = null;
+
+        async function initPublicSign(tokenId) {
+            hideAllScreens();
+            document.getElementById('public-screen').style.display = 'flex';
+            document.getElementById('public-view-sign').classList.remove('hidden');
+            showLoader("Mengecek Akses Tanda Tangan...");
+            
+            try {
+                let tugas = null, surat = null;
+                if(IS_PREVIEW) {
+                    tugas = MOCK_DB.tugas_ttd.find(t=>t.id===tokenId);
+                    if(tugas) surat = MOCK_DB.surat.find(s=>s.id===tugas.suratId);
+                } else {
+                    const tDoc = await getDoc(doc(db, "tugas_ttd", tokenId));
+                    if(tDoc.exists()) { tugas = {id: tDoc.id, ...tDoc.data()}; const sDoc = await getDoc(doc(db, "surat", tugas.suratId)); if(sDoc.exists()) surat = {id: sDoc.id, ...sDoc.data()}; }
+                }
+
+                hideLoader();
+                if(!tugas || !surat) {
+                    document.getElementById('public-view-sign').innerHTML = `<div class="text-center p-8"><i class="fa-solid fa-triangle-exclamation text-4xl text-red-500 mb-4"></i><h2 class="text-xl font-bold">Link Tidak Valid</h2><p class="text-slate-500 mt-2">Permintaan tanda tangan tidak ditemukan atau link salah.</p></div>`;
+                    return;
+                }
+
+                currentTugasToken = tugas.id;
+                signSuratId = surat.id;
+
+                // Bind Data
+                document.getElementById('pub-sign-nama').innerText = `Halo, ${tugas.namaPengurus}`;
+                document.getElementById('pub-sign-jabatan').innerText = tugas.jabatanPengurus;
+                document.getElementById('pub-sign-nosurat').innerText = surat.nomorSurat;
+                document.getElementById('pub-sign-ket').innerText = surat.keterangan;
+                document.getElementById('pub-sign-btn-doc').href = surat.linkDokumen; // BUTTON LINK BINDING
+
+                if(tugas.status === 'Signed') {
+                    document.getElementById('signature-section').style.display = 'none';
+                    document.getElementById('signature-done-msg').style.display = 'block';
+                    document.getElementById('signature-done-msg').querySelector('p').innerText = "Dokumen ini sudah Anda tandatangani sebelumnya. Link ini tidak dapat digunakan lagi untuk menandatangani ulang.";
+                } else {
+                    // Init Canvas
+                    const canvas = document.getElementById('signature-pad');
+                    // Resize logic for high DPI / Responsiveness
+                    const resizeCanvas = () => { 
+                        const ratio =  Math.max(window.devicePixelRatio || 1, 1); 
+                        canvas.width = canvas.offsetWidth * ratio; 
+                        canvas.height = canvas.offsetHeight * ratio; 
+                        canvas.getContext("2d").scale(ratio, ratio); 
+                        if(signaturePad) signaturePad.clear();
+                    };
+                    window.addEventListener("resize", resizeCanvas);
+                    resizeCanvas();
+                    signaturePad = new SignaturePad(canvas, { penColor: 'rgb(15, 23, 42)' }); // dark slate color
+                }
+            } catch(e) { hideLoader(); console.error(e); }
+        }
+
+        window.clearSignature = () => { if(signaturePad) signaturePad.clear(); }
+        window.submitSignature = async () => {
+            if(signaturePad.isEmpty()) { showToast("Silakan gambar tanda tangan Anda dulu", true); return; }
+            
+            const dataURL = signaturePad.toDataURL(); // Base64 Image
+            showLoader("Menyimpan Tanda Tangan...");
+            
+            try {
+                if(IS_PREVIEW) {
+                    const idx = MOCK_DB.tugas_ttd.findIndex(t=>t.id===currentTugasToken);
+                    if(idx>-1) { MOCK_DB.tugas_ttd[idx].status = 'Signed'; MOCK_DB.tugas_ttd[idx].gambarTTD = dataURL; MOCK_DB.tugas_ttd[idx].signedAt = Date.now(); }
+                    checkAndUpdateSuratStatusPreview(signSuratId);
+                } else {
+                    // Update Token
+                    await updateDoc(doc(db, "tugas_ttd", currentTugasToken), { status: 'Signed', gambarTTD: dataURL, signedAt: serverTimestamp() });
+                    // Check Completion
+                    const q = query(collection(db, "tugas_ttd"), where("suratId", "==", signSuratId));
+                    const snap = await getDocs(q);
+                    let allSigned = true;
+                    snap.forEach(d => { if(d.data().status !== 'Signed') allSigned = false; });
+                    
+                    if(allSigned) { await updateDoc(doc(db, "surat", signSuratId), { status: 'Selesai' }); }
+                }
+
+                hideLoader();
+                document.getElementById('signature-section').style.display = 'none';
+                document.getElementById('signature-done-msg').style.display = 'block';
+            } catch(e) { hideLoader(); showToast("Gagal menyimpan", true); console.error(e); }
+        }
+
+        function checkAndUpdateSuratStatusPreview(suratId) {
+            const allTugas = MOCK_DB.tugas_ttd.filter(t=>t.suratId === suratId);
+            const allSigned = allTugas.every(t=>t.status === 'Signed');
+            if(allSigned) { const idx = MOCK_DB.surat.findIndex(s=>s.id === suratId); if(idx>-1) MOCK_DB.surat[idx].status = 'Selesai'; }
+        }
+
+        // ==========================================
+        // 8. PUBLIC FRONTEND (VERIFIKASI)
+        // ==========================================
+        async function initPublicVerify(suratId) {
+            hideAllScreens();
+            document.getElementById('public-screen').style.display = 'flex';
+            document.getElementById('public-view-verify').classList.remove('hidden');
+            showLoader("Memvalidasi Dokumen...");
+            
+            try {
+                let surat = null, tugas = [];
+                if(IS_PREVIEW) {
+                    surat = MOCK_DB.surat.find(s=>s.id===suratId);
+                    tugas = MOCK_DB.tugas_ttd.filter(t=>t.suratId===suratId);
+                } else {
+                    const sDoc = await getDoc(doc(db, "surat", suratId));
+                    if(sDoc.exists()) surat = {id: sDoc.id, ...sDoc.data()};
+                    const q = query(collection(db, "tugas_ttd"), where("suratId", "==", suratId));
+                    const tSnap = await getDocs(q);
+                    tSnap.forEach(d => tugas.push({id: d.id, ...d.data()}));
+                }
+
+                hideLoader();
+                if(!surat) {
+                    document.getElementById('public-view-verify').innerHTML = `<div class="text-center p-8"><i class="fa-solid fa-circle-xmark text-4xl text-red-500 mb-4"></i><h2 class="text-xl font-bold">Dokumen Tidak Ditemukan</h2><p class="text-slate-500 mt-2">Pastikan link atau QR code valid.</p></div>`;
+                    return;
+                }
+
+                // Bind Data
+                const st = document.getElementById('pub-ver-status');
+                st.innerText = surat.status === 'Selesai' ? 'SAH & SELESAI DITANDATANGANI' : 'MASIH DALAM PROSES (MENUNGGU)';
+                st.className = `py-2 font-bold ${surat.status === 'Selesai' ? 'text-green-600' : 'text-orange-500'}`;
+                
+                document.getElementById('pub-ver-no').innerText = surat.nomorSurat;
+                document.getElementById('pub-ver-tgl').innerText = surat.tanggal;
+                document.getElementById('pub-ver-ket').innerText = surat.keterangan;
+                document.getElementById('pub-ver-btn-doc').href = surat.linkDokumen;
+
+                // Render TTD
+                const ttdList = document.getElementById('pub-ver-ttd-list');
+                ttdList.innerHTML = tugas.map(t => {
+                    const isSigned = t.status === 'Signed';
+                    return `
+                    <div class="flex items-center justify-between p-3 border border-slate-100 rounded-xl bg-white shadow-sm">
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm">${t.namaPengurus}</p>
+                            <p class="text-xs text-slate-500">${t.jabatanPengurus}</p>
+                        </div>
+                        <div class="text-right">
+                            ${isSigned ? 
+                                `<div class="h-12 w-24 border border-slate-100 rounded bg-slate-50 overflow-hidden flex justify-center ml-auto mb-1"><img src="${t.gambarTTD}" class="h-full object-contain"></div>
+                                 <span class="text-[10px] font-bold text-green-600 uppercase tracking-wider"><i class="fa-solid fa-check mr-1"></i>Signed</span>`
+                                : 
+                                `<div class="h-12 w-24 flex items-center justify-center ml-auto"><i class="fa-solid fa-clock-rotate-left text-slate-300 text-2xl"></i></div>
+                                 <span class="text-[10px] font-bold text-orange-400 uppercase tracking-wider">Menunggu</span>`
+                            }
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+
+            } catch(e) { hideLoader(); console.error(e); }
+        }
+
+        // ==========================================
+        // MOCK DATABASE ENGINE (UNTUK PREVIEW)
+        // ==========================================
+        const MOCK_DB = {
+            pengurus: [],
+            surat: [],
+            tugas_ttd: []
+        };
+        function mockFirebaseEngine() { console.log("Mock Engine Loaded."); }
+
+    </script>
+</body></div>
+</html>
