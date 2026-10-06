@@ -1,0 +1,198 @@
+<!-- THUMBNAIL POSTINGAN BLOGGER (tersembunyi) -->
+<div style="display:none"><img src="https://placehold.co/600x400/0f766e/ffffff?text=E-Voting+De+Tanjung+Raya" alt="E-Voting De Tanjung Raya"/></div>
+
+<div id="evt"></div>
+<style>
+body{overflow:hidden!important}
+#evt{--bg:#f1f5f4;--cd:#fff;--tx:#0f172a;--mu:#64748b;--pr:#0f766e;--bd:#e2e8f0;--er:#dc2626;position:fixed;inset:0;z-index:2147483647;background:var(--bg);color:var(--tx);overflow:auto;font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-text-size-adjust:100%}
+@media(prefers-color-scheme:dark){#evt{--bg:#0b1412;--cd:#14201d;--tx:#e6f0ee;--mu:#94a8a3;--bd:#24332f}}
+#evt *{box-sizing:border-box}
+#evt h1,#evt h2,#evt h3,#evt p{margin:0}
+#evt .top{position:sticky;top:0;background:var(--pr);color:#fff;padding:12px 16px;font-weight:700;z-index:5}
+#evt .top small{display:block;font-weight:400;opacity:.85;font-size:12px}
+#evt main{max-width:640px;margin:0 auto;padding:14px 14px 96px}
+#evt .hero{background:linear-gradient(135deg,#0f766e,#115e59);color:#fff;border-radius:16px;padding:22px 18px;margin-bottom:16px}
+#evt .hero p{opacity:.9;margin:4px 0 14px}
+#evt h2{font-size:17px;margin:14px 0 10px}
+#evt .card{background:var(--cd);border:1px solid var(--bd);border-radius:14px;padding:12px;margin-bottom:12px;display:flex;gap:12px}
+#evt .card .ph{width:84px;height:84px;border-radius:12px;object-fit:cover;flex:none;background:var(--bd)}
+#evt .card p{color:var(--mu);font-size:13px;white-space:pre-line}
+#evt .box{background:var(--cd);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}
+#evt label{display:block;font-weight:600;font-size:13px;margin:10px 0 4px}
+#evt input,#evt select,#evt textarea{width:100%;padding:12px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit}
+#evt textarea{min-height:90px}
+#evt .btn{display:block;width:100%;padding:13px;border:0;border-radius:12px;background:var(--pr);color:#fff;font:inherit;font-weight:700;margin-top:14px;cursor:pointer}
+#evt .btn.sec{background:var(--bd);color:var(--tx)}
+#evt .btn.dg{background:var(--er)}
+#evt .btn.sm{display:inline-block;width:auto;padding:7px 12px;margin:0 6px 0 0;font-size:13px}
+#evt .btn:disabled{opacity:.45}
+#evt .opt{display:flex;align-items:center;gap:10px;padding:10px;border:2px solid var(--bd);border-radius:12px;margin-bottom:8px;cursor:pointer}
+#evt .opt.on{border-color:var(--pr);background:rgba(15,118,110,.1)}
+#evt .opt input{width:auto}
+#evt .opt img{width:44px;height:44px;border-radius:10px;object-fit:cover}
+#evt .cam{position:relative;background:#000;border-radius:14px;overflow:hidden}
+#evt video,#evt .cam img{width:100%;display:block;transform:scaleX(-1)}
+#evt .cam img{transform:none}
+#evt .st{text-align:center;padding:10px;font-weight:600}
+#evt .ok{color:#16a34a}#evt .no{color:var(--er)}
+#evt .big{font-size:44px;font-weight:800;text-align:center;color:var(--pr)}
+#evt .cdn{display:flex;gap:8px;justify-content:center;margin:10px 0}
+#evt .cdn div{background:var(--bg);border-radius:12px;padding:10px 12px;text-align:center;min-width:64px}
+#evt .cdn b{display:block;font-size:24px}
+#evt .bar{height:22px;background:var(--bd);border-radius:11px;overflow:hidden;margin:4px 0 12px}
+#evt .bar i{display:block;height:100%;background:var(--pr);min-width:2px}
+#evt .row{display:flex;justify-content:space-between;gap:8px;font-weight:600}
+#evt nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--cd);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom)}
+#evt nav a{flex:1;text-align:center;padding:10px 2px;font-size:12px;color:var(--mu);cursor:pointer}
+#evt nav a b{display:block;font-size:19px}
+#evt nav a.on{color:var(--pr);font-weight:700}
+#evt .tw{overflow-x:auto}
+#evt table{border-collapse:collapse;width:100%;font-size:13px}
+#evt th,#evt td{border-bottom:1px solid var(--bd);padding:8px;text-align:left;white-space:nowrap}
+#evt .tg{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:20px;font-size:14px;z-index:9;max-width:90%}
+#evt .ft{text-align:center;margin-top:20px;font-size:12px;color:var(--mu)}
+#evt .ft a{cursor:pointer;text-decoration:underline}
+#evt .pv{background:#f59e0b;color:#000;text-align:center;font-size:11px;padding:2px}
+</style>
+
+<script>
+// KONFIGURASI APLIKASI
+// UBAH IS_PREVIEW KE false JIKA AKAN DI-DEPLOY KE BLOGGER
+const IS_PREVIEW = false; // Set default true untuk Canvas
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzetRy9FSo09UU5uGZlEqsppABDizNozOd1Bf7C6Qu3tqJc3DWuif8o2-mVsNfBWuGl/exec";
+
+(function(){
+const $=s=>document.querySelector('#evt '+s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const S={view:'home',calon:[],gang:[],st:null,token:'',tab:'dash',off:0,ad:null,ef:{}};
+const V={step:1,gang:'',rumah:'',wa:'',calon:'',photo:''};
+let stream=null,loop=null,faceOK=false,libOK=false,tick=null,poll=null;
+
+/* ===== DATA DUMMY (MODE PREVIEW) ===== */
+function ph(t){return 'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="#0f766e"/><text x="200" y="240" font-size="140" text-anchor="middle" fill="#fff" font-family="sans-serif">'+t+'</text></svg>')}
+const D={calon:[{id:'C1',nama:'H. Ahmad Fauzi',visi:'Lingkungan bersih dan aman.\nRonda aktif tiap malam.',foto:ph('A')},{id:'C2',nama:'Budi Santoso',visi:'Transparansi iuran warga.\nPerbaikan drainase.',foto:ph('B')},{id:'C3',nama:'Siti Rahmawati',visi:'Taman bermain dan kegiatan pemuda.',foto:ph('S')}],
+gang:['Gang Mawar','Gang Melati','Gang Anggrek'],votes:[{ts:'05/10/2026 08:10',gang:'Gang Mawar',rumah:'1',wa:'6281200000001',calon:'C1',foto:'#'},{ts:'05/10/2026 09:30',gang:'Gang Melati',rumah:'7',wa:'6281200000002',calon:'C2',foto:'#'}],
+deadline:new Date(Date.now()+864e5).toISOString()};
+const nk=(g,r)=>g+'|'+String(r).toUpperCase().replace(/\s+/g,'');
+function normWA(w){w=String(w).replace(/\D/g,'');if(w.startsWith('0'))w='62'+w.slice(1);return /^628\d{8,12}$/.test(w)?w:''}
+function res(){const t=D.votes.length;return D.calon.map(c=>{const n=D.votes.filter(v=>v.calon==c.id).length;return{id:c.id,nama:c.nama,foto:c.foto,suara:n,persen:t?+(n*100/t).toFixed(1):0}})}
+function mock(a,d){
+ const fin=Date.now()>=new Date(D.deadline).getTime();
+ switch(a){
+ case 'getPublic':return{ok:true,calon:D.calon,gang:D.gang};
+ case 'getStatus':return{ok:true,total:D.votes.length,deadline:D.deadline,now:new Date().toISOString(),finished:fin,results:fin?res():[]};
+ case 'submitVote':{
+  if(fin)return{ok:false,msg:'Pemilihan sudah ditutup.'};
+  const w=normWA(d.wa);if(!w)return{ok:false,msg:'Nomor WhatsApp tidak valid.'};
+  if(D.votes.some(v=>nk(v.gang,v.rumah)==nk(d.gang,d.rumah)))return{ok:false,msg:'Rumah ini sudah menggunakan hak suaranya.'};
+  if(D.votes.some(v=>v.wa==w))return{ok:false,msg:'Nomor WhatsApp ini sudah digunakan untuk memilih.'};
+  D.votes.push({ts:new Date().toLocaleString('id-ID'),gang:d.gang,rumah:d.rumah,wa:w,calon:d.calon,foto:d.foto});return{ok:true};}
+ case 'adminLogin':return d.u==='admin'&&d.p==='edudigital'?{ok:true,token:'PREVIEW'}:{ok:false,msg:'Username atau password salah.'};
+ case 'adminData':return{ok:true,total:D.votes.length,results:res(),calon:D.calon,gang:D.gang,deadline:D.deadline,log:D.votes.slice().reverse().map(v=>({ts:v.ts,gang:v.gang,rumah:v.rumah,wa:v.wa,calon:(D.calon.find(c=>c.id==v.calon)||{}).nama||v.calon,foto:v.foto}))};
+ case 'saveCalon':{let c=D.calon.find(x=>x.id==d.id);if(!c){c={id:'C'+(Date.now()%100000)};D.calon.push(c)}c.nama=d.nama;c.visi=d.visi;if(d.fotoData)c.foto=d.fotoData;else if(!c.foto)c.foto=ph(d.nama[0]);return{ok:true}}
+ case 'deleteCalon':if(D.votes.some(v=>v.calon==d.id))return{ok:false,msg:'Calon sudah punya suara, tidak bisa dihapus.'};D.calon=D.calon.filter(c=>c.id!=d.id);return{ok:true};
+ case 'addGang':if(D.gang.includes(d.nama))return{ok:false,msg:'Gang sudah ada.'};D.gang.push(d.nama);return{ok:true};
+ case 'deleteGang':D.gang=D.gang.filter(g=>g!=d.nama);return{ok:true};
+ case 'saveSetting':D.deadline=d.value;return{ok:true};
+ }return{ok:false,msg:'Aksi tidak dikenal'}}
+
+async function api(action,data){
+ data=data||{};
+ if(IS_PREVIEW){await new Promise(r=>setTimeout(r,250));return mock(action,data)}
+ try{const r=await fetch(GAS_URL,{method:'POST',body:JSON.stringify(Object.assign({action:action,token:S.token},data))});return await r.json()}
+ catch(e){return{ok:false,msg:'Gagal terhubung ke server. Periksa koneksi.'}}}
+
+function toast(m){const t=document.createElement('div');t.className='tg';t.textContent=m;$('').appendChild(t);setTimeout(()=>t.remove(),3000)}
+function readImg(file,max){return new Promise(res=>{const fr=new FileReader();fr.onload=()=>{const i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height));const c=document.createElement('canvas');c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.8))};i.src=fr.result};fr.readAsDataURL(file)})}
+function localInput(iso){const d=new Date(iso),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes())}
+function bars(r){return r.map(c=>'<div class="row"><span>'+esc(c.nama)+'</span><span>'+c.persen+'% ('+c.suara+')</span></div><div class="bar"><i style="width:'+c.persen+'%"></i></div>').join('')}
+
+/* ===== NAVIGASI ===== */
+function go(v){stopCam();clearInterval(tick);clearInterval(poll);S.view=v;if(v==='vote'){V.step=1}render();if(v==='wait'){loadStatus();poll=setInterval(loadStatus,20000);tick=setInterval(tickCd,1000)}}
+function render(){
+ const adm=S.view==='admin';
+ let h='<div class="top">E-Voting De Tanjung Raya<small>'+(adm?'Panel Panitia':'Pemilihan Ketua Perumahan')+'</small></div>'+(IS_PREVIEW?'<div class="pv">MODE PREVIEW - data dummy</div>':'')+'<main>';
+ if(S.view==='home')h+=vHome();else if(S.view==='vote')h+=vVote();else if(S.view==='wait')h+=vWait();else if(S.view==='login')h+=vLogin();else h+=vAdmin();
+ h+='</main>';
+ if(adm){h+='<nav>'+[['dash','📊','Dashboard'],['calon','👤','Calon'],['gang','🏘️','Gang'],['log','📋','Log'],['waktu','⏰','Waktu']].map(t=>'<a data-t="'+t[0]+'" class="'+(S.tab===t[0]?'on':'')+'"><b>'+t[1]+'</b>'+t[2]+'</a>').join('')+'</nav>'}
+ else h+='<nav>'+[['home','🏠','Beranda'],['vote','🗳️','Vote'],['wait','⏳','Status']].map(t=>'<a data-g="'+t[0]+'" class="'+(S.view===t[0]?'on':'')+'"><b>'+t[1]+'</b>'+t[2]+'</a>').join('')+'</nav>';
+ $('').innerHTML=h;
+ $('').querySelectorAll('[data-g]').forEach(a=>a.onclick=()=>go(a.dataset.g));
+ $('').querySelectorAll('[data-t]').forEach(a=>a.onclick=()=>{S.tab=a.dataset.t;S.ef={};render()});
+ bind();if(S.view==='vote'&&V.step===2&&!V.photo)startCam();
+}
+
+/* ===== VIEW WARGA ===== */
+function vHome(){return '<div class="hero"><h1>Suara Anda Menentukan</h1><p>Pemilihan Ketua Perumahan De Tanjung Raya</p><button class="btn sec" data-a="tovote">Mulai Memilih</button></div><h2>Calon Ketua</h2>'+(S.calon.length?S.calon.map(c=>'<div class="card"><img class="ph" src="'+esc(c.foto)+'" alt=""><div><h3>'+esc(c.nama)+'</h3><p>'+esc(c.visi)+'</p></div></div>').join(''):'<div class="box">Belum ada data calon.</div>')+'<div class="ft"><a data-a="tologin">Panitia</a></div>'}
+function vVote(){
+ if(V.step===3)return '<div class="box" style="text-align:center"><div class="big">✅</div><h2>Suara Anda Tercatat</h2><p>Terima kasih telah berpartisipasi.</p><button class="btn" data-a="towait">Lihat Status Pemilihan</button></div>';
+ if(V.step===1)return '<h2>Form Pemilihan</h2><div class="box"><label>Nama Gang</label><select id="fg"><option value="">- Pilih gang -</option>'+S.gang.map(g=>'<option'+(V.gang===g?' selected':'')+'>'+esc(g)+'</option>').join('')+'</select><label>Nomor Rumah</label><input id="fr" value="'+esc(V.rumah)+'" placeholder="Contoh: 12A"><label>No WhatsApp</label><input id="fw" type="tel" inputmode="numeric" value="'+esc(V.wa)+'" placeholder="08xxxxxxxxxx"><label>Pilih Calon Ketua</label>'+S.calon.map(c=>'<label class="opt'+(V.calon===c.id?' on':'')+'"><input type="radio" name="fc" value="'+esc(c.id)+'"'+(V.calon===c.id?' checked':'')+'><img src="'+esc(c.foto)+'" alt=""><span>'+esc(c.nama)+'</span></label>').join('')+'<button class="btn" data-a="next">Lanjut Verifikasi Wajah</button></div>';
+ return '<h2>Verifikasi Wajah</h2><div class="box"><div class="cam">'+(V.photo?'<img src="'+V.photo+'" alt="">':'<video id="vid" autoplay playsinline muted></video>')+'</div><div class="st" id="msg">'+(V.photo?'Foto siap dikirim':'Menyiapkan...')+'</div>'+(V.photo?'<button class="btn" id="bs" data-a="send">Konfirmasi Kirim</button><button class="btn sec" data-a="retake">Foto Ulang</button>':'<button class="btn" id="bc" data-a="shot" disabled>Ambil Foto</button><button class="btn sec" data-a="back">Kembali</button>')+'</div>';}
+function vWait(){
+ const s=S.st;if(!s)return '<div class="box">Memuat...</div>';
+ let h='<div class="box"><p style="text-align:center;color:var(--mu)">Total Pemilih Masuk</p><div class="big">'+s.total+'</div></div>';
+ if(s.finished)return h+'<h2>Hasil Akhir Perolehan Suara</h2><div class="box">'+bars(s.results)+'</div>';
+ return h+'<div class="box"><p style="text-align:center;font-weight:600">Pengumuman hasil dalam</p><div class="cdn" id="cd"></div></div>';}
+function tickCd(){const s=S.st,e=document.querySelector('#evt #cd');if(!s||!e||s.finished)return;let r=new Date(s.deadline).getTime()-(Date.now()+S.off);if(r<=0){loadStatus();return}
+ const d=Math.floor(r/864e5),j=Math.floor(r%864e5/36e5),m=Math.floor(r%36e5/6e4),c=Math.floor(r%6e4/1e3);
+ e.innerHTML=[[d,'Hari'],[j,'Jam'],[m,'Menit'],[c,'Detik']].map(x=>'<div><b>'+x[0]+'</b>'+x[1]+'</div>').join('')}
+async function loadStatus(){const r=await api('getStatus');if(!r.ok)return;S.st=r;S.off=new Date(r.now).getTime()-Date.now();if(S.view==='wait'){render();tickCd()}}
+
+/* ===== KAMERA ===== */
+async function loadLib(){if(libOK)return;await new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.js';s.onload=ok;s.onerror=no;document.head.appendChild(s)});await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model/');libOK=true}
+function upd(){const b=document.querySelector('#evt #bc'),m=document.querySelector('#evt #msg');if(!b)return;b.disabled=!faceOK;m.className='st '+(faceOK?'ok':'no');m.textContent=faceOK?'Wajah terdeteksi ✓':'Arahkan wajah Anda ke kamera'}
+async function startCam(){
+ faceOK=false;const m=document.querySelector('#evt #msg');
+ try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640}},audio:false});document.querySelector('#evt #vid').srcObject=stream}
+ catch(e){if(IS_PREVIEW){faceOK=true;upd();m.textContent='Preview: kamera tidak tersedia, deteksi dilewati';return}m.className='st no';m.textContent='Kamera tidak dapat diakses. Izinkan akses kamera lalu muat ulang.';return}
+ m.textContent='Memuat pendeteksi wajah...';
+ try{await loadLib()}catch(e){if(IS_PREVIEW){faceOK=true;upd();return}m.className='st no';m.textContent='Gagal memuat pendeteksi wajah. Periksa koneksi lalu muat ulang.';return}
+ upd();loop=setInterval(async()=>{const v=document.querySelector('#evt #vid');if(!v||v.readyState<2)return;const r=await faceapi.detectSingleFace(v,new faceapi.TinyFaceDetectorOptions({inputSize:224,scoreThreshold:.5}));faceOK=!!r;upd()},500)}
+function stopCam(){clearInterval(loop);if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}}
+function shot(){const v=document.querySelector('#evt #vid'),c=document.createElement('canvas');
+ if(v&&v.videoWidth){c.width=480;c.height=480*v.videoHeight/v.videoWidth;const x=c.getContext('2d');x.translate(c.width,0);x.scale(-1,1);x.drawImage(v,0,0,c.width,c.height)}
+ else{c.width=480;c.height=360;const x=c.getContext('2d');x.fillStyle='#888';x.fillRect(0,0,480,360);x.fillStyle='#fff';x.font='28px sans-serif';x.fillText('FOTO PREVIEW',140,190)}
+ V.photo=c.toDataURL('image/jpeg',.7);stopCam();render()}
+
+/* ===== VIEW ADMIN ===== */
+function vLogin(){return '<h2>Login Panitia</h2><div class="box"><label>Username</label><input id="lu" autocomplete="username"><label>Password</label><input id="lp" type="password" autocomplete="current-password"><button class="btn" data-a="login">Masuk</button><button class="btn sec" data-a="tohome">Kembali</button></div>'}
+function vAdmin(){
+ const a=S.ad;if(!a)return '<div class="box">Memuat...</div>';
+ if(S.tab==='dash')return '<h2>Dashboard</h2><div class="box"><p style="text-align:center;color:var(--mu)">Total Suara</p><div class="big">'+a.total+'</div></div><div class="box"><h3>Perolehan Sementara</h3><br>'+bars(a.results)+'</div><button class="btn sec" data-a="refresh">Muat Ulang Data</button><button class="btn dg" data-a="logout">Keluar</button>';
+ if(S.tab==='calon'){const e=S.ef;return '<h2>Data Calon</h2><div class="box"><h3>'+(e.id?'Edit Calon':'Tambah Calon')+'</h3><label>Nama</label><input id="cn" value="'+esc(e.nama||'')+'"><label>Visi Misi</label><textarea id="cv">'+esc(e.visi||'')+'</textarea><label>Foto</label><input id="cf" type="file" accept="image/*">'+(e.fotoData||e.foto?'<br><img class="ph" style="width:80px;height:80px;border-radius:10px;object-fit:cover" src="'+esc(e.fotoData||e.foto)+'" alt="">':'')+'<button class="btn" data-a="savecalon">Simpan</button>'+(e.id?'<button class="btn sec" data-a="cancel">Batal</button>':'')+'</div>'+a.calon.map(c=>'<div class="card"><img class="ph" src="'+esc(c.foto)+'" alt=""><div><h3>'+esc(c.nama)+'</h3><p>'+esc(c.visi)+'</p><br><button class="btn sm" data-a="editcalon" data-id="'+esc(c.id)+'">Edit</button><button class="btn sm dg" data-a="delcalon" data-id="'+esc(c.id)+'">Hapus</button></div></div>').join('')}
+ if(S.tab==='gang')return '<h2>Data Gang</h2><div class="box"><label>Nama Gang Baru</label><input id="gn"><button class="btn" data-a="addgang">Tambah</button></div>'+a.gang.map(g=>'<div class="box row" style="align-items:center"><span>'+esc(g)+'</span><button class="btn sm dg" data-a="delgang" data-n="'+esc(g)+'">Hapus</button></div>').join('');
+ if(S.tab==='log')return '<h2>Log Pemilih ('+a.log.length+')</h2><div class="box tw"><table><tr><th>Waktu</th><th>Gang</th><th>No</th><th>WhatsApp</th><th>Pilihan</th><th>Foto</th></tr>'+a.log.map(l=>'<tr><td>'+esc(l.ts)+'</td><td>'+esc(l.gang)+'</td><td>'+esc(l.rumah)+'</td><td>'+esc(l.wa)+'</td><td>'+esc(l.calon)+'</td><td><a href="'+esc(l.foto)+'" target="_blank" rel="noopener">Lihat</a></td></tr>').join('')+'</table></div>';
+ return '<h2>Pengaturan Waktu</h2><div class="box"><label>Waktu Pengumuman Hasil (juga batas akhir voting)</label><input id="wt" type="datetime-local" value="'+localInput(a.deadline)+'"><button class="btn" data-a="savewaktu">Simpan Waktu</button></div>'}
+async function loadAdmin(){const r=await api('adminData');if(!r.ok){S.token='';toast(r.msg||'Sesi berakhir');go('login');return}S.ad=r;render()}
+
+/* ===== AKSI ===== */
+function bind(){document.querySelectorAll('#evt [data-a]').forEach(b=>b.onclick=()=>act(b.dataset.a,b))}
+async function act(a,b){
+ const v=id=>{const e=document.querySelector('#evt #'+id);return e?e.value.trim():''};
+ if(a==='tovote')return go('vote');if(a==='towait')return go('wait');if(a==='tologin')return go(S.token?'admin':'login');if(a==='tohome')return go('home');
+ if(a==='next'){V.gang=v('fg');V.rumah=v('fr');V.wa=v('fw');const c=document.querySelector('#evt [name=fc]:checked');V.calon=c?c.value:'';
+  if(!V.gang||!V.rumah||!V.calon)return toast('Lengkapi gang, nomor rumah, dan pilihan calon.');
+  if(!normWA(V.wa))return toast('Nomor WhatsApp tidak valid (contoh 081234567890).');
+  V.step=2;V.photo='';return render()}
+ if(a==='back'){stopCam();V.step=1;return render()}
+ if(a==='shot')return shot();
+ if(a==='retake'){V.photo='';return render()}
+ if(a==='send'){b.disabled=true;b.textContent='Mengirim...';const r=await api('submitVote',{gang:V.gang,rumah:V.rumah,wa:V.wa,calon:V.calon,foto:V.photo});
+  if(r.ok){V.step=3;V.photo='';V.gang=V.rumah=V.wa=V.calon='';render()}else{toast(r.msg||'Gagal mengirim suara');b.disabled=false;b.textContent='Konfirmasi Kirim'}return}
+ if(a==='login'){const r=await api('adminLogin',{u:v('lu'),p:document.querySelector('#evt #lp').value});if(!r.ok)return toast(r.msg||'Login gagal');S.token=r.token;S.view='admin';S.tab='dash';S.ad=null;render();return loadAdmin()}
+ if(a==='logout'){S.token='';S.ad=null;return go('home')}
+ if(a==='refresh')return loadAdmin();
+ if(a==='cancel'){S.ef={};return render()}
+ if(a==='editcalon'){S.ef=Object.assign({},S.ad.calon.find(c=>c.id==b.dataset.id));return render()}
+ if(a==='savecalon'){const n=v('cn');if(!n)return toast('Nama calon wajib diisi.');const f=document.querySelector('#evt #cf').files[0];const fd=f?await readImg(f,480):(S.ef.fotoData||'');
+  const r=await api('saveCalon',{id:S.ef.id||'',nama:n,visi:v('cv'),fotoData:fd});toast(r.ok?'Calon tersimpan':r.msg);if(r.ok){S.ef={};await loadPublic();loadAdmin()}return}
+ if(a==='delcalon'){if(!confirm('Hapus calon ini?'))return;const r=await api('deleteCalon',{id:b.dataset.id});toast(r.ok?'Calon dihapus':r.msg);if(r.ok){await loadPublic();loadAdmin()}return}
+ if(a==='addgang'){const n=v('gn');if(!n)return toast('Isi nama gang.');const r=await api('addGang',{nama:n});toast(r.ok?'Gang ditambahkan':r.msg);if(r.ok){await loadPublic();loadAdmin()}return}
+ if(a==='delgang'){if(!confirm('Hapus gang ini?'))return;const r=await api('deleteGang',{nama:b.dataset.n});toast(r.ok?'Gang dihapus':r.msg);if(r.ok){await loadPublic();loadAdmin()}return}
+ if(a==='savewaktu'){const t=v('wt');if(!t)return toast('Pilih tanggal dan jam.');const r=await api('saveSetting',{key:'WaktuPengumuman',value:new Date(t).toISOString()});toast(r.ok?'Waktu tersimpan':r.msg);if(r.ok)loadAdmin()}
+}
+async function loadPublic(){const r=await api('getPublic');if(r.ok){S.calon=r.calon;S.gang=r.gang}}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stopCam()});
+(async function(){$('').innerHTML='<div class="top">E-Voting De Tanjung Raya</div><main><div class="box">Memuat data...</div></main>';await loadPublic();render()})();
+})();
+</script>
