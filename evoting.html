@@ -1,94 +1,80 @@
 <!-- THUMBNAIL POSTINGAN BLOGGER (tersembunyi) -->
 <div style="display:none"><img src="https://placehold.co/600x400/0f766e/ffffff?text=E-Voting+De+Tanjung+Raya" alt="E-Voting De Tanjung Raya"/></div>
 
-<div id="evt"></div>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <style>
-body{overflow:hidden!important}
-#evt{--bg:#f1f5f4;--cd:#fff;--tx:#0f172a;--mu:#64748b;--pr:#0f766e;--bd:#e2e8f0;--er:#dc2626;position:fixed;inset:0;z-index:2147483647;background:var(--bg);color:var(--tx);overflow:auto;font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-text-size-adjust:100%}
-@media(prefers-color-scheme:dark){#evt{--bg:#0b1412;--cd:#14201d;--tx:#e6f0ee;--mu:#94a8a3;--bd:#24332f}}
-#evt *{box-sizing:border-box}
-#evt h1,#evt h2,#evt h3,#evt p{margin:0}
-#evt .top{position:sticky;top:0;background:var(--pr);color:#fff;padding:12px 16px;font-weight:700;z-index:5}
-#evt .top small{display:block;font-weight:400;opacity:.85;font-size:12px}
-#evt main{max-width:640px;margin:0 auto;padding:14px 14px 96px}
-#evt .hero{background:linear-gradient(135deg,#0f766e,#115e59);color:#fff;border-radius:16px;padding:22px 18px;margin-bottom:16px}
-#evt .hero p{opacity:.9;margin:4px 0 14px}
-#evt h2{font-size:17px;margin:14px 0 10px}
-#evt .card{background:var(--cd);border:1px solid var(--bd);border-radius:14px;padding:12px;margin-bottom:12px;display:flex;gap:12px}
-#evt .card .ph{width:84px;height:84px;border-radius:12px;object-fit:cover;flex:none;background:var(--bd)}
-#evt .card p{color:var(--mu);font-size:13px;white-space:pre-line}
-#evt .box{background:var(--cd);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}
-#evt label{display:block;font-weight:600;font-size:13px;margin:10px 0 4px}
-#evt input,#evt select,#evt textarea{width:100%;padding:12px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit}
-#evt textarea{min-height:90px}
-#evt .btn{display:block;width:100%;padding:13px;border:0;border-radius:12px;background:var(--pr);color:#fff;font:inherit;font-weight:700;margin-top:14px;cursor:pointer}
-#evt .btn.sec{background:var(--bd);color:var(--tx)}
-#evt .btn.dg{background:var(--er)}
-#evt .btn.sm{display:inline-block;width:auto;padding:7px 12px;margin:0 6px 0 0;font-size:13px}
-#evt .btn:disabled{opacity:.45}
-#evt .opt{display:flex;align-items:center;gap:10px;padding:10px;border:2px solid var(--bd);border-radius:12px;margin-bottom:8px;cursor:pointer}
-#evt .opt.on{border-color:var(--pr);background:rgba(15,118,110,.1)}
-#evt .opt input{width:auto}
-#evt .opt img{width:44px;height:44px;border-radius:10px;object-fit:cover}
-#evt .cam{position:relative;background:#000;border-radius:14px;overflow:hidden}
-#evt video,#evt .cam img{width:100%;display:block;transform:scaleX(-1)}
-#evt .cam img{transform:none}
-#evt .st{text-align:center;padding:10px;font-weight:600}
-#evt .ok{color:#16a34a}#evt .no{color:var(--er)}
-#evt .big{font-size:44px;font-weight:800;text-align:center;color:var(--pr)}
-#evt .cdn{display:flex;gap:8px;justify-content:center;margin:10px 0}
-#evt .cdn div{background:var(--bg);border-radius:12px;padding:10px 12px;text-align:center;min-width:64px}
-#evt .cdn b{display:block;font-size:24px}
-#evt .bar{height:22px;background:var(--bd);border-radius:11px;overflow:hidden;margin:4px 0 12px}
-#evt .bar i{display:block;height:100%;background:var(--pr);min-width:2px}
-#evt .row{display:flex;justify-content:space-between;gap:8px;font-weight:600}
-#evt nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--cd);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom)}
-#evt nav a{flex:1;text-align:center;padding:10px 2px;font-size:12px;color:var(--mu);cursor:pointer}
-#evt nav a b{display:block;font-size:19px}
-#evt nav a.on{color:var(--pr);font-weight:700}
-#evt .tw{overflow-x:auto}
-#evt table{border-collapse:collapse;width:100%;font-size:13px}
-#evt th,#evt td{border-bottom:1px solid var(--bd);padding:8px;text-align:left;white-space:nowrap}
-#evt .tg{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:20px;font-size:14px;z-index:9;max-width:90%}
-#evt .ft{text-align:center;margin-top:20px;font-size:12px;color:var(--mu)}
-#evt .ft a{cursor:pointer;text-decoration:underline}
-#evt .pv{background:#f59e0b;color:#000;text-align:center;font-size:11px;padding:2px}
+:root{--primary:#0f766e;--primary-light:#14b8a6;--primary-dark:#115e59;--bg:#f8fafc;--ink:#0f172a;--muted:#64748b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%}body{margin:0!important;padding:0!important;overflow:hidden!important;font-family:'Inter',sans-serif;background:var(--bg);overscroll-behavior-y:none}
+button,input,select,textarea{font:inherit}button{cursor:pointer}
+#app-container{position:fixed;inset:0;z-index:2147483647;background:#f1f5f9;display:flex;justify-content:center;isolation:isolate}
+.mobile-view{width:100%;max-width:480px;height:100%;background:#f8fafc;position:relative;display:flex;flex-direction:column;box-shadow:0 0 20px rgba(0,0,0,.10);overflow:hidden}
+.glass{background:rgba(255,255,255,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.35)}
+.gc{background:#fff;border:1px solid rgba(226,232,240,.65);box-shadow:0 4px 15px -3px rgba(0,0,0,.05),0 4px 6px -4px rgba(0,0,0,.025);border-radius:18px}
+.content-area{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:90px}
+::-webkit-scrollbar{width:0;height:0;background:transparent}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;border:0;border-radius:13px;background:var(--primary);color:#fff;font-weight:800;font-size:13px;box-shadow:0 7px 18px rgba(15,118,110,.20);transition:transform .12s ease,opacity .12s ease}
+.btn:active{transform:scale(.98)}.btn:disabled{opacity:.45;cursor:not-allowed}.btn.sec{background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;box-shadow:none}.btn.dg{background:#dc2626}.btn.sm{width:auto;min-height:36px;padding:0 13px;font-size:11px;border-radius:10px;display:inline-flex}
+.fl{display:block;margin:12px 0 6px;color:#475569;font-size:11px;font-weight:700}.inp{width:100%;min-height:48px;padding:11px 13px;border:1px solid #e2e8f0;border-radius:13px;background:#f8fafc;color:#0f172a;font-size:13px;font-weight:600;outline:none;transition:.15s}.inp:focus{background:#fff;border-color:#14b8a6;box-shadow:0 0 0 3px rgba(20,184,166,.12)}textarea.inp{min-height:90px}
+.opt{display:flex;align-items:center;gap:12px;padding:11px;border:1px solid #e2e8f0;border-radius:14px;margin-bottom:8px;cursor:pointer;background:#fff;transition:.15s}.opt.on{border-color:#14b8a6;background:#f0fdfa;box-shadow:0 0 0 2px rgba(20,184,166,.08)}.opt input{display:none}
+.av{width:48px;height:48px;border-radius:12px;object-fit:cover;flex:none;background:#e2e8f0}.bar{height:9px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin:5px 0 12px}.bar i{display:block;height:100%;background:linear-gradient(90deg,#0f766e,#14b8a6);min-width:2px;border-radius:99px}.cam{position:relative;background:#020617;border-radius:16px;overflow:hidden}.cam video{width:100%;display:block;transform:scaleX(-1)}.cam img{width:100%;display:block}
+.cdn{display:flex;gap:8px;justify-content:center;margin-top:10px}.cdn div{background:#f0fdfa;border:1px solid #ccfbf1;border-radius:12px;padding:10px 4px;text-align:center;min-width:64px;font-size:10px;font-weight:700;color:#0f766e}.cdn b{display:block;font-size:22px;color:#134e4a}
+.nav-btn{touch-action:manipulation;user-select:none;-webkit-user-select:none;display:flex;flex-direction:column;align-items:center;justify-content:center;width:64px;height:56px;border-radius:12px;border:0;background:transparent;color:#94a3b8;transition:.15s}.nav-btn.on{background:#f0fdfa;color:#0f766e}
+.backdrop{position:absolute;inset:0;z-index:200;display:flex;align-items:flex-end;background:rgba(15,23,42,.60);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}.backdrop.hidden,#loading.hidden{display:none!important}.sheet{width:100%;max-height:92%;overflow-y:auto;background:#fff;border-radius:26px 26px 0 0;padding:22px 18px max(20px,env(safe-area-inset-bottom));box-shadow:0 -14px 40px rgba(15,23,42,.22);animation:up .22s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.4}to{transform:none;opacity:1}}
+#loading{position:absolute;inset:0;z-index:150;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.80);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}#toast{position:absolute;top:80px;left:50%;transform:translateX(-50%);z-index:300;pointer-events:none;background:#1e293b;color:#fff;padding:8px 16px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:opacity .3s;max-width:90%;text-align:center}
+.rv{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #f1f5f9;font-size:13px}.rv span{color:#64748b}.rv b{text-align:right}.chip{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:99px;font-size:10px;font-weight:700}.tbl{border-collapse:collapse;width:100%;font-size:11px}.tbl th,.tbl td{border-bottom:1px solid #e2e8f0;padding:8px;text-align:left;white-space:nowrap}
+.hero{border-radius:22px;padding:20px;color:#fff;background:linear-gradient(135deg,#0f766e 0%,#115e59 100%);box-shadow:0 14px 30px rgba(15,118,110,.18);position:relative;overflow:hidden}.hero:after{content:'';position:absolute;width:150px;height:150px;border-radius:50%;right:-55px;top:-55px;background:rgba(255,255,255,.09)}.hero-icon{width:48px;height:48px;border-radius:15px;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;margin-bottom:13px}.section-kicker{font-size:10px;text-transform:uppercase;letter-spacing:.12em;font-weight:800;color:#94a3b8}.section-title{font-size:16px;font-weight:800;color:#0f172a}.mini-stat{padding:13px;border-radius:15px;background:#f8fafc;border:1px solid #e2e8f0}.mini-stat b{display:block;font-size:22px;color:#0f766e}.mini-stat span{font-size:9px;color:#94a3b8;font-weight:700}
+@keyframes pop{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}.pop{animation:pop .42s cubic-bezier(.2,1.4,.4,1)}
 </style>
+
+<div id="app-container"><div class="mobile-view">
+ <header class="glass sticky top-0 z-40 px-4 py-4 flex items-center justify-between shadow-sm">
+  <div class="flex items-center gap-3">
+   <div class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white shadow-md"><i id="logo" class="fa-solid fa-check-to-slot"></i></div>
+   <div><h1 class="text-sm font-bold text-slate-800 leading-tight">E-Voting De Tanjung Raya</h1><p id="hd" class="text-xs text-slate-500 font-medium"></p></div>
+  </div>
+  <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></div>
+ </header>
+ <main id="main" class="content-area p-4 space-y-4"></main>
+ <nav id="nav" class="glass absolute bottom-0 left-0 w-full border-t border-slate-200 px-2 pt-2 flex justify-around items-center min-h-[70px] z-40" style="padding-bottom:max(8px,env(safe-area-inset-bottom))"></nav>
+ <div id="loading" class="hidden"><i class="fa-solid fa-circle-notch fa-spin text-4xl text-teal-600 mb-3"></i><p class="text-sm font-medium text-slate-600">Memproses...</p></div>
+ <div id="toast"></div>
+ <div id="sheet" class="backdrop hidden"><div id="sheetc" class="sheet"></div></div>
+</div></div>
 
 <script>
 // KONFIGURASI APLIKASI
-// UBAH IS_PREVIEW KE false JIKA AKAN DI-DEPLOY KE BLOGGER
-const IS_PREVIEW = false; // Set default true untuk Canvas
+const IS_PREVIEW = false; // true = mode preview data dummy
 const GAS_URL = "https://script.google.com/macros/s/AKfycbzetRy9FSo09UU5uGZlEqsppABDizNozOd1Bf7C6Qu3tqJc3DWuif8o2-mVsNfBWuGl/exec";
 
 (function(){
-const $=s=>document.querySelector('#evt '+s);
+const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const S={view:'home',calon:[],gang:[],st:null,token:'',tab:'dash',off:0,ad:null,ef:{}};
-const V={step:1,gang:'',rumah:'',wa:'',calon:'',photo:''};
-let stream=null,loop=null,faceOK=false,libOK=false,tick=null,poll=null;
+const V={step:0,nama:'',gang:'',rumah:'',wa:'',calon:'',photo:''};
+let stream=null,loop=null,faceOK=false,libOK=false,tick=null,poll=null,lc=0;
 
-/* ===== DATA DUMMY (MODE PREVIEW) ===== */
+/* ===== DATA DUMMY (PREVIEW) ===== */
 function ph(t){return 'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="#0f766e"/><text x="200" y="240" font-size="140" text-anchor="middle" fill="#fff" font-family="sans-serif">'+t+'</text></svg>')}
 const D={calon:[{id:'C1',nama:'H. Ahmad Fauzi',visi:'Lingkungan bersih dan aman.\nRonda aktif tiap malam.',foto:ph('A')},{id:'C2',nama:'Budi Santoso',visi:'Transparansi iuran warga.\nPerbaikan drainase.',foto:ph('B')},{id:'C3',nama:'Siti Rahmawati',visi:'Taman bermain dan kegiatan pemuda.',foto:ph('S')}],
-gang:['Gang Mawar','Gang Melati','Gang Anggrek'],votes:[{ts:'05/10/2026 08:10',gang:'Gang Mawar',rumah:'1',wa:'6281200000001',calon:'C1',foto:'#'},{ts:'05/10/2026 09:30',gang:'Gang Melati',rumah:'7',wa:'6281200000002',calon:'C2',foto:'#'}],
-deadline:new Date(Date.now()+864e5).toISOString()};
+gang:['Gang Mawar','Gang Melati','Gang Anggrek'],votes:[{ts:'05/10/2026 08:10',gang:'Gang Mawar',rumah:'1',wa:'6281200000001',calon:'C1',foto:'#'},{ts:'05/10/2026 09:30',gang:'Gang Melati',rumah:'7',wa:'6281200000002',calon:'C2',foto:'#'}],deadline:new Date(Date.now()+864e5).toISOString()};
 const nk=(g,r)=>g+'|'+String(r).toUpperCase().replace(/\s+/g,'');
 function normWA(w){w=String(w).replace(/\D/g,'');if(w.startsWith('0'))w='62'+w.slice(1);return /^628\d{8,12}$/.test(w)?w:''}
+function pg(){const t=D.votes.length;return D.gang.map(g=>{const n=D.votes.filter(v=>v.gang==g).length;return{nama:g,suara:n,persen:t?+(n*100/t).toFixed(1):0}}).sort((a,b)=>b.suara-a.suara)}
 function res(){const t=D.votes.length;return D.calon.map(c=>{const n=D.votes.filter(v=>v.calon==c.id).length;return{id:c.id,nama:c.nama,foto:c.foto,suara:n,persen:t?+(n*100/t).toFixed(1):0}})}
 function mock(a,d){
  const fin=Date.now()>=new Date(D.deadline).getTime();
  switch(a){
  case 'getPublic':return{ok:true,calon:D.calon,gang:D.gang};
- case 'getStatus':return{ok:true,total:D.votes.length,deadline:D.deadline,now:new Date().toISOString(),finished:fin,results:fin?res():[]};
- case 'submitVote':{
-  if(fin)return{ok:false,msg:'Pemilihan sudah ditutup.'};
-  const w=normWA(d.wa);if(!w)return{ok:false,msg:'Nomor WhatsApp tidak valid.'};
+ case 'getStatus':return{ok:true,total:D.votes.length,deadline:D.deadline,now:new Date().toISOString(),finished:fin,results:fin?res():[],perGang:pg()};
+ case 'submitVote':{if(fin)return{ok:false,msg:'Pemilihan sudah ditutup.'};const w=normWA(d.wa);if(!w)return{ok:false,msg:'Nomor WhatsApp tidak valid.'};
   if(D.votes.some(v=>nk(v.gang,v.rumah)==nk(d.gang,d.rumah)))return{ok:false,msg:'Rumah ini sudah menggunakan hak suaranya.'};
   if(D.votes.some(v=>v.wa==w))return{ok:false,msg:'Nomor WhatsApp ini sudah digunakan untuk memilih.'};
-  D.votes.push({ts:new Date().toLocaleString('id-ID'),gang:d.gang,rumah:d.rumah,wa:w,calon:d.calon,foto:d.foto});return{ok:true};}
+  D.votes.push({ts:new Date().toLocaleString('id-ID'),nama:d.nama,gang:d.gang,rumah:d.rumah,wa:w,calon:d.calon,foto:d.foto});return{ok:true}}
  case 'adminLogin':return d.u==='admin'&&d.p==='edudigital'?{ok:true,token:'PREVIEW'}:{ok:false,msg:'Username atau password salah.'};
- case 'adminData':return{ok:true,total:D.votes.length,results:res(),calon:D.calon,gang:D.gang,deadline:D.deadline,log:D.votes.slice().reverse().map(v=>({ts:v.ts,gang:v.gang,rumah:v.rumah,wa:v.wa,calon:(D.calon.find(c=>c.id==v.calon)||{}).nama||v.calon,foto:v.foto}))};
+ case 'adminData':return{ok:true,total:D.votes.length,results:res(),perGang:pg(),calon:D.calon,gang:D.gang,deadline:D.deadline,log:D.votes.slice().reverse().map(v=>({ts:v.ts,nama:v.nama||'-',gang:v.gang,rumah:v.rumah,wa:v.wa,calon:(D.calon.find(c=>c.id==v.calon)||{}).nama||v.calon,foto:v.foto}))};
  case 'saveCalon':{let c=D.calon.find(x=>x.id==d.id);if(!c){c={id:'C'+(Date.now()%100000)};D.calon.push(c)}c.nama=d.nama;c.visi=d.visi;if(d.fotoData)c.foto=d.fotoData;else if(!c.foto)c.foto=ph(d.nama[0]);return{ok:true}}
  case 'deleteCalon':if(D.votes.some(v=>v.calon==d.id))return{ok:false,msg:'Calon sudah punya suara, tidak bisa dihapus.'};D.calon=D.calon.filter(c=>c.id!=d.id);return{ok:true};
  case 'addGang':if(D.gang.includes(d.nama))return{ok:false,msg:'Gang sudah ada.'};D.gang.push(d.nama);return{ok:true};
@@ -96,103 +82,136 @@ function mock(a,d){
  case 'saveSetting':D.deadline=d.value;return{ok:true};
  }return{ok:false,msg:'Aksi tidak dikenal'}}
 
-async function api(action,data){
- data=data||{};
- if(IS_PREVIEW){await new Promise(r=>setTimeout(r,250));return mock(action,data)}
- try{const r=await fetch(GAS_URL,{method:'POST',body:JSON.stringify(Object.assign({action:action,token:S.token},data))});return await r.json()}
- catch(e){return{ok:false,msg:'Gagal terhubung ke server. Periksa koneksi.'}}}
-
-function toast(m){const t=document.createElement('div');t.className='tg';t.textContent=m;$('').appendChild(t);setTimeout(()=>t.remove(),3000)}
+/* ===== UTIL ===== */
+function loading(on){lc=Math.max(0,lc+(on?1:-1));$('loading').classList.toggle('hidden',lc===0)}
+async function api(action,data,quiet){
+ data=data||{};if(!quiet)loading(true);
+ try{
+  if(IS_PREVIEW){await new Promise(r=>setTimeout(r,250));return mock(action,data)}
+  const r=await fetch(GAS_URL,{method:'POST',body:JSON.stringify(Object.assign({action:action,token:S.token},data))});return await r.json()
+ }catch(e){return{ok:false,msg:'Gagal terhubung ke server. Periksa koneksi.'}}
+ finally{if(!quiet)loading(false)}}
+function toast(m){const t=$('toast');t.textContent=m;t.style.opacity=1;clearTimeout(toast._t);toast._t=setTimeout(()=>t.style.opacity=0,2800)}
+function sheet(h){$('sheetc').innerHTML=h;$('sheet').classList.remove('hidden')}
+function closeSheet(){$('sheet').classList.add('hidden')}
 function readImg(file,max){return new Promise(res=>{const fr=new FileReader();fr.onload=()=>{const i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height));const c=document.createElement('canvas');c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.8))};i.src=fr.result};fr.readAsDataURL(file)})}
 function localInput(iso){const d=new Date(iso),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes())}
-function bars(r){return r.map(c=>'<div class="row"><span>'+esc(c.nama)+'</span><span>'+c.persen+'% ('+c.suara+')</span></div><div class="bar"><i style="width:'+c.persen+'%"></i></div>').join('')}
+function bars(r){return r.length?r.map(c=>'<div class="flex justify-between text-xs font-bold text-slate-700"><span>'+esc(c.nama)+'</span><span class="text-teal-700">'+c.persen+'% <span class="text-slate-400">('+c.suara+')</span></span></div><div class="bar"><i style="width:'+c.persen+'%"></i></div>').join(''):'<p class="text-xs text-slate-400 text-center">Belum ada data.</p>'}
+const T=(t,s)=>'<div class="px-1"><p class="text-[10px] uppercase tracking-[.12em] font-bold text-slate-400">'+(s||'')+'</p><h2 class="font-bold text-slate-800 text-base">'+t+'</h2></div>';
+const P=(a,b)=>'<div class="gc p-4">'+a+'</div>';
+function calonCard(c,hl){return '<div class="gc p-3 flex gap-3" '+(hl?'style="border-color:#14b8a6"':'')+'><img class="av" style="width:64px;height:64px" src="'+esc(c.foto)+'" alt=""><div class="min-w-0"><h3 class="font-bold text-sm text-slate-800">'+esc(c.nama)+'</h3><p class="text-xs text-slate-500 mt-1" style="white-space:pre-line">'+esc(c.visi)+'</p></div></div>'}
 
-/* ===== NAVIGASI ===== */
-function go(v){stopCam();clearInterval(tick);clearInterval(poll);S.view=v;if(v==='vote'){V.step=1}render();if(v==='wait'){loadStatus();poll=setInterval(loadStatus,20000);tick=setInterval(tickCd,1000)}}
+/* ===== NAV & RENDER ===== */
+function go(v){stopCam();clearInterval(tick);clearInterval(poll);S.view=v;if(v==='vote'){if(V.step===4)V.step=0;loadStatus()}render();if(v==='wait'){loadStatus();poll=setInterval(()=>loadStatus(true),20000);tick=setInterval(tickCd,1000)}}
+function navHtml(){
+ const adm=S.view==='admin',B=(k,i,t,on,attr)=>'<button type="button" class="nav-btn'+(on?' on':'')+'" '+attr+'="'+k+'"><i class="fa-solid fa-'+i+' text-xl mb-1"></i><span class="text-[10px] font-semibold">'+t+'</span></button>';
+ if(adm)return [['dash','chart-pie','Dashboard'],['calon','user-tie','Calon'],['gang','house-flag','Gang'],['log','clipboard-list','Log'],['waktu','clock','Waktu']].map(t=>B(t[0],t[1],t[2],S.tab===t[0],'data-t')).join('');
+ return [['home','house','Beranda'],['vote','check-to-slot','Vote'],['wait','chart-simple','Status'],['login','lock','Panitia']].map(t=>B(t[0],t[1],t[2],S.view===t[0]||(t[0]==='login'&&S.view==='login'),'data-g')).join('')}
 function render(){
- const adm=S.view==='admin';
- let h='<div class="top">E-Voting De Tanjung Raya<small>'+(adm?'Panel Panitia':'Pemilihan Ketua Perumahan')+'</small></div>'+(IS_PREVIEW?'<div class="pv">MODE PREVIEW - data dummy</div>':'')+'<main>';
- if(S.view==='home')h+=vHome();else if(S.view==='vote')h+=vVote();else if(S.view==='wait')h+=vWait();else if(S.view==='login')h+=vLogin();else h+=vAdmin();
- h+='</main>';
- if(adm){h+='<nav>'+[['dash','📊','Dashboard'],['calon','👤','Calon'],['gang','🏘️','Gang'],['log','📋','Log'],['waktu','⏰','Waktu']].map(t=>'<a data-t="'+t[0]+'" class="'+(S.tab===t[0]?'on':'')+'"><b>'+t[1]+'</b>'+t[2]+'</a>').join('')+'</nav>'}
- else h+='<nav>'+[['home','🏠','Beranda'],['vote','🗳️','Vote'],['wait','⏳','Status']].map(t=>'<a data-g="'+t[0]+'" class="'+(S.view===t[0]?'on':'')+'"><b>'+t[1]+'</b>'+t[2]+'</a>').join('')+'</nav>';
- $('').innerHTML=h;
- $('').querySelectorAll('[data-g]').forEach(a=>a.onclick=()=>go(a.dataset.g));
- $('').querySelectorAll('[data-t]').forEach(a=>a.onclick=()=>{S.tab=a.dataset.t;S.ef={};render()});
- bind();if(S.view==='vote'&&V.step===2&&!V.photo)startCam();
-}
+ $('nav').innerHTML=navHtml();
+ const m=$('main');
+ m.innerHTML=S.view==='home'?vHome():S.view==='vote'?vVote():S.view==='wait'?vWait():S.view==='login'?vLogin():vAdmin();
+ m.scrollTop=0;
+ if(S.view==='vote'&&V.step===1&&!V.photo)startCam();
+ if(S.view==='wait')tickCd()}
 
 /* ===== VIEW WARGA ===== */
-function vHome(){return '<div class="hero"><h1>Suara Anda Menentukan</h1><p>Pemilihan Ketua Perumahan De Tanjung Raya</p><button class="btn sec" data-a="tovote">Mulai Memilih</button></div><h2>Calon Ketua</h2>'+(S.calon.length?S.calon.map(c=>'<div class="card"><img class="ph" src="'+esc(c.foto)+'" alt=""><div><h3>'+esc(c.nama)+'</h3><p>'+esc(c.visi)+'</p></div></div>').join(''):'<div class="box">Belum ada data calon.</div>')+'<div class="ft"><a data-a="tologin">Panitia</a></div>'}
+function fmtDl(){const s=S.st;if(!s)return '...';const d=new Date(s.deadline);return d.toLocaleDateString('id-ID',{timeZone:'Asia/Jakarta',weekday:'long',day:'numeric',month:'long',year:'numeric'})+' pukul '+d.toLocaleTimeString('id-ID',{timeZone:'Asia/Jakarta',hour:'2-digit',minute:'2-digit',hour12:false}).replace(':','.')+' WIB'}
+function vHome(){
+ const total=S.calon.length;
+ return '<div class="hero"><div class="hero-icon"><i class="fa-solid fa-check-to-slot text-xl"></i></div><div class="text-[10px] font-bold uppercase tracking-[.12em] opacity-75">E-Voting Warga</div><h2 class="text-[23px] font-extrabold leading-tight mt-1">Suara Anda Menentukan</h2><p class="text-sm opacity-90 mt-1 mb-5">Pemilihan Ketua Perumahan De Tanjung Raya</p><button class="btn" data-a="tovote" style="background:#fff;color:#0f766e;box-shadow:none"><i class="fa-solid fa-arrow-right"></i>Mulai Memilih</button></div>'
+ +'<div class="grid grid-cols-2 gap-3"><div class="mini-stat"><b>'+total+'</b><span>CALON KETUA</span></div><div class="mini-stat"><b><i class="fa-solid fa-shield-halved text-lg"></i></b><span>PEMILIHAN AMAN</span></div></div>'
+ +T('Calon Ketua','Kenali Kandidat')+(S.calon.length?S.calon.map(c=>calonCard(c)).join(''):'<div class="gc p-5 text-center text-sm text-slate-500">Belum ada data calon.</div>')}
+
+function stepper(n){const L=['Wajah','Data','Periksa'];return '<div class="gc p-3 flex items-center justify-between">'+L.map((l,i)=>'<div class="flex items-center gap-2 '+(i<2?'flex-1':'')+'"><span class="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-extrabold '+(n>i+1?'bg-teal-600 text-white':n===i+1?'bg-teal-100 text-teal-700 ring-2 ring-teal-500':'bg-slate-100 text-slate-400')+'">'+(n>i+1?'<i class="fa-solid fa-check"></i>':i+1)+'</span><span class="text-[10px] font-bold '+(n===i+1?'text-teal-700':'text-slate-400')+'">'+l+'</span>'+(i<2?'<span class="flex-1 h-px bg-slate-200"></span>':'')+'</div>').join('')+'</div>'}
 function vVote(){
- if(V.step===3)return '<div class="box" style="text-align:center"><div class="big">✅</div><h2>Suara Anda Tercatat</h2><p>Terima kasih telah berpartisipasi.</p><button class="btn" data-a="towait">Lihat Status Pemilihan</button></div>';
- if(V.step===1)return '<h2>Form Pemilihan</h2><div class="box"><label>Nama Gang</label><select id="fg"><option value="">- Pilih gang -</option>'+S.gang.map(g=>'<option'+(V.gang===g?' selected':'')+'>'+esc(g)+'</option>').join('')+'</select><label>Nomor Rumah</label><input id="fr" value="'+esc(V.rumah)+'" placeholder="Contoh: 12A"><label>No WhatsApp</label><input id="fw" type="tel" inputmode="numeric" value="'+esc(V.wa)+'" placeholder="08xxxxxxxxxx"><label>Pilih Calon Ketua</label>'+S.calon.map(c=>'<label class="opt'+(V.calon===c.id?' on':'')+'"><input type="radio" name="fc" value="'+esc(c.id)+'"'+(V.calon===c.id?' checked':'')+'><img src="'+esc(c.foto)+'" alt=""><span>'+esc(c.nama)+'</span></label>').join('')+'<button class="btn" data-a="next">Lanjut Verifikasi Wajah</button></div>';
- return '<h2>Verifikasi Wajah</h2><div class="box"><div class="cam">'+(V.photo?'<img src="'+V.photo+'" alt="">':'<video id="vid" autoplay playsinline muted></video>')+'</div><div class="st" id="msg">'+(V.photo?'Foto siap dikirim':'Menyiapkan...')+'</div>'+(V.photo?'<button class="btn" id="bs" data-a="send">Konfirmasi Kirim</button><button class="btn sec" data-a="retake">Foto Ulang</button>':'<button class="btn" id="bc" data-a="shot" disabled>Ambil Foto</button><button class="btn sec" data-a="back">Kembali</button>')+'</div>';}
+ const cal=S.calon.find(c=>c.id===V.calon)||{};
+ if(V.step===0){const closed=S.st&&S.st.finished;
+  return T('Peraturan & Alur','Sebelum Memilih')+'<div class="gc p-4"><h3 class="font-bold text-sm text-slate-800 mb-2"><i class="fa-solid fa-scale-balanced text-teal-600 mr-2"></i>Ketentuan</h3><ol class="text-xs text-slate-600 space-y-2 pl-4" style="list-style:decimal"><li>Pemilih adalah <b>warga Perumahan De Tanjung Raya</b>.</li><li><b>1 rumah memiliki 1 hak suara.</b> Satu nomor WhatsApp hanya dapat dipakai sekali.</li><li>Data yang diisi harus benar sesuai identitas dan alamat Anda.</li><li>Suara yang sudah dikirim <b>tidak dapat diubah</b>.</li></ol></div>'
+  +'<div class="gc p-4"><h3 class="font-bold text-sm text-slate-800 mb-2"><i class="fa-solid fa-list-check text-teal-600 mr-2"></i>Alur Memilih</h3><ol class="text-xs text-slate-600 space-y-2 pl-4" style="list-style:decimal"><li>Verifikasi wajah lewat kamera</li><li>Isi data diri dan pilih calon</li><li>Periksa kembali data dan pilihan</li><li>Konfirmasi dan kirim suara</li></ol></div>'
+  +'<div class="gc p-4 bg-teal-50"><h3 class="font-bold text-sm text-teal-800 mb-1"><i class="fa-solid fa-bullhorn mr-2"></i>Pengumuman Hasil</h3><p class="text-xs text-teal-900">'+(closed?'Pemilihan sudah ditutup. Hasil telah diumumkan di menu Status.':'Hasil diumumkan pada <b>'+esc(fmtDl())+'</b>.')+'</p></div>'
+  +(closed?'':'<button class="btn" data-a="start">Saya Mengerti, Lanjut Memilih<i class="fa-solid fa-arrow-right"></i></button>')}
+ if(V.step===1)return stepper(1)+T('Verifikasi Wajah','Langkah 1')+'<div class="gc p-4"><div class="cam">'+(V.photo?'<img src="'+V.photo+'" alt="">':'<video id="vid" autoplay playsinline muted></video>')+'</div><div class="text-center font-bold text-sm py-3 text-slate-500" id="msg">'+(V.photo?'<span class="text-emerald-600">Foto siap digunakan</span>':'Menyiapkan...')+'</div>'+(V.photo?'<button class="btn" data-a="tofrm">Lanjut Isi Form<i class="fa-solid fa-arrow-right"></i></button><button class="btn sec mt-2" data-a="retake"><i class="fa-solid fa-rotate"></i>Foto Ulang</button>':'<button class="btn" id="bc" data-a="shot" disabled><i class="fa-solid fa-camera"></i>Ambil Foto</button><button class="btn sec mt-2" data-a="back">Kembali</button>')+'</div>';
+ if(V.step===2)return stepper(2)+T('Form Pemilihan','Langkah 2')+'<div class="gc p-4"><label class="fl" style="margin-top:0">Nama Lengkap</label><input class="inp" id="fn" value="'+esc(V.nama)+'" placeholder="Sesuai identitas" autocomplete="name"><label class="fl">Nama Gang</label><select class="inp" id="fg"><option value="">- Pilih gang -</option>'+S.gang.map(g=>'<option'+(V.gang===g?' selected':'')+'>'+esc(g)+'</option>').join('')+'</select><label class="fl">Nomor Rumah</label><input class="inp" id="fr" value="'+esc(V.rumah)+'" placeholder="Contoh: 12A"><label class="fl">No WhatsApp</label><input class="inp" id="fw" type="tel" inputmode="numeric" value="'+esc(V.wa)+'" placeholder="08xxxxxxxxxx"><label class="fl">Pilih Calon Ketua</label>'+S.calon.map(c=>'<label class="opt'+(V.calon===c.id?' on':'')+'"><input type="radio" name="fc" value="'+esc(c.id)+'"'+(V.calon===c.id?' checked':'')+'><img class="av" src="'+esc(c.foto)+'" alt=""><span class="flex-1 font-bold text-sm text-slate-800">'+esc(c.nama)+'</span><i class="fa-solid fa-circle-check text-lg '+(V.calon===c.id?'text-teal-600':'text-slate-200')+'"></i></label>').join('')+'<button class="btn mt-3" data-a="review">Lanjut Periksa Pilihan<i class="fa-solid fa-arrow-right"></i></button><button class="btn sec mt-2" data-a="back">Kembali ke Foto</button></div>';
+ if(V.step===3)return stepper(3)+T('Periksa Pilihan Anda','Langkah 3')+'<div class="gc p-4"><div class="cam" style="max-height:180px"><img src="'+V.photo+'" alt="" style="object-fit:cover;max-height:180px"></div><div class="mt-2"><div class="rv"><span>Nama</span><b>'+esc(V.nama)+'</b></div><div class="rv"><span>Gang</span><b>'+esc(V.gang)+'</b></div><div class="rv"><span>No Rumah</span><b>'+esc(V.rumah)+'</b></div><div class="rv"><span>WhatsApp</span><b>'+esc(V.wa)+'</b></div></div></div><p class="text-[10px] font-bold uppercase tracking-wide text-slate-400 px-1">Calon yang Anda pilih</p>'+calonCard(cal,1)+'<button class="btn" data-a="send"><i class="fa-solid fa-paper-plane"></i>Konfirmasi &amp; Kirim Suara</button><button class="btn sec" data-a="edit">Ubah Data</button>';
+ return '<div class="gc p-6 text-center mt-6"><div class="w-20 h-20 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-4xl pop" style="box-shadow:0 0 0 10px #ecfdf5"><i class="fa-solid fa-check"></i></div><h2 class="text-xl font-extrabold text-slate-800 mt-5">Suara Anda Tercatat</h2><p class="text-xs text-slate-500 mt-1 mb-5">Terima kasih telah berpartisipasi dalam pemilihan.</p><button class="btn" data-a="towait"><i class="fa-solid fa-chart-simple"></i>Lihat Status Pemilihan</button></div>'}
 function vWait(){
- const s=S.st;if(!s)return '<div class="box">Memuat...</div>';
- let h='<div class="box"><p style="text-align:center;color:var(--mu)">Total Pemilih Masuk</p><div class="big">'+s.total+'</div></div>';
- if(s.finished)return h+'<h2>Hasil Akhir Perolehan Suara</h2><div class="box">'+bars(s.results)+'</div>';
- return h+'<div class="box"><p style="text-align:center;font-weight:600">Pengumuman hasil dalam</p><div class="cdn" id="cd"></div></div>';}
-function tickCd(){const s=S.st,e=document.querySelector('#evt #cd');if(!s||!e||s.finished)return;let r=new Date(s.deadline).getTime()-(Date.now()+S.off);if(r<=0){loadStatus();return}
+ const s=S.st;if(!s)return '<div class="gc p-6 text-center text-sm text-slate-500"><i class="fa-solid fa-spinner fa-spin text-teal-600 mr-2"></i>Memuat...</div>';
+ let h='<div class="gc p-5 text-center"><p class="text-[10px] uppercase tracking-wide font-bold text-slate-400">Total Pemilih Masuk</p><p class="text-5xl font-extrabold text-teal-600 mt-1">'+s.total+'</p></div>';
+ const g='<div class="gc p-4"><h3 class="font-bold text-sm text-slate-800 mb-3"><i class="fa-solid fa-house-flag text-teal-600 mr-2"></i>Suara Masuk per Gang</h3>'+bars(s.perGang||[])+'</div>';
+ if(s.finished)return h+'<div class="gc p-4"><h3 class="font-bold text-sm text-slate-800 mb-3"><i class="fa-solid fa-trophy text-amber-500 mr-2"></i>Hasil Akhir Perolehan Suara</h3>'+bars(s.results)+'</div>'+g;
+ return h+'<div class="gc p-4 text-center"><p class="text-sm font-bold text-slate-700">Pengumuman hasil dalam</p><div class="cdn" id="cd"></div></div>'+g}
+function tickCd(){const s=S.st,e=$('cd');if(!s||!e||s.finished)return;const r=new Date(s.deadline).getTime()-(Date.now()+S.off);if(r<=0){loadStatus();return}
  const d=Math.floor(r/864e5),j=Math.floor(r%864e5/36e5),m=Math.floor(r%36e5/6e4),c=Math.floor(r%6e4/1e3);
  e.innerHTML=[[d,'Hari'],[j,'Jam'],[m,'Menit'],[c,'Detik']].map(x=>'<div><b>'+x[0]+'</b>'+x[1]+'</div>').join('')}
-async function loadStatus(){const r=await api('getStatus');if(!r.ok)return;S.st=r;S.off=new Date(r.now).getTime()-Date.now();if(S.view==='wait'){render();tickCd()}}
+async function loadStatus(q){const r=await api('getStatus',{},true);if(!r.ok)return;S.st=r;S.off=new Date(r.now).getTime()-Date.now();if(S.view==='wait'){render()}else if(S.view==='vote'&&V.step===0)render()}
 
 /* ===== KAMERA ===== */
 async function loadLib(){if(libOK)return;await new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.js';s.onload=ok;s.onerror=no;document.head.appendChild(s)});await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model/');libOK=true}
-function upd(){const b=document.querySelector('#evt #bc'),m=document.querySelector('#evt #msg');if(!b)return;b.disabled=!faceOK;m.className='st '+(faceOK?'ok':'no');m.textContent=faceOK?'Wajah terdeteksi ✓':'Arahkan wajah Anda ke kamera'}
+function upd(){const b=$('bc'),m=$('msg');if(!b)return;b.disabled=!faceOK;m.innerHTML=faceOK?'<span class="text-emerald-600"><i class="fa-solid fa-circle-check mr-1"></i>Wajah terdeteksi</span>':'<span class="text-red-500">Arahkan wajah Anda ke kamera</span>'}
 async function startCam(){
- faceOK=false;const m=document.querySelector('#evt #msg');
- try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640}},audio:false});document.querySelector('#evt #vid').srcObject=stream}
- catch(e){if(IS_PREVIEW){faceOK=true;upd();m.textContent='Preview: kamera tidak tersedia, deteksi dilewati';return}m.className='st no';m.textContent='Kamera tidak dapat diakses. Izinkan akses kamera lalu muat ulang.';return}
+ faceOK=false;const m=$('msg');
+ try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640}},audio:false});$('vid').srcObject=stream}
+ catch(e){if(IS_PREVIEW){faceOK=true;upd();return}m.innerHTML='<span class="text-red-500">Kamera tidak dapat diakses. Izinkan akses kamera lalu muat ulang.</span>';return}
  m.textContent='Memuat pendeteksi wajah...';
- try{await loadLib()}catch(e){if(IS_PREVIEW){faceOK=true;upd();return}m.className='st no';m.textContent='Gagal memuat pendeteksi wajah. Periksa koneksi lalu muat ulang.';return}
- upd();loop=setInterval(async()=>{const v=document.querySelector('#evt #vid');if(!v||v.readyState<2)return;const r=await faceapi.detectSingleFace(v,new faceapi.TinyFaceDetectorOptions({inputSize:224,scoreThreshold:.5}));faceOK=!!r;upd()},500)}
+ try{await loadLib()}catch(e){if(IS_PREVIEW){faceOK=true;upd();return}m.innerHTML='<span class="text-red-500">Gagal memuat pendeteksi wajah. Periksa koneksi.</span>';return}
+ upd();loop=setInterval(async()=>{const v=$('vid');if(!v||v.readyState<2)return;const r=await faceapi.detectSingleFace(v,new faceapi.TinyFaceDetectorOptions({inputSize:224,scoreThreshold:.5}));faceOK=!!r;upd()},500)}
 function stopCam(){clearInterval(loop);if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}}
-function shot(){const v=document.querySelector('#evt #vid'),c=document.createElement('canvas');
+function shot(){const v=$('vid'),c=document.createElement('canvas');
  if(v&&v.videoWidth){c.width=480;c.height=480*v.videoHeight/v.videoWidth;const x=c.getContext('2d');x.translate(c.width,0);x.scale(-1,1);x.drawImage(v,0,0,c.width,c.height)}
  else{c.width=480;c.height=360;const x=c.getContext('2d');x.fillStyle='#888';x.fillRect(0,0,480,360);x.fillStyle='#fff';x.font='28px sans-serif';x.fillText('FOTO PREVIEW',140,190)}
  V.photo=c.toDataURL('image/jpeg',.7);stopCam();render()}
 
 /* ===== VIEW ADMIN ===== */
-function vLogin(){return '<h2>Login Panitia</h2><div class="box"><label>Username</label><input id="lu" autocomplete="username"><label>Password</label><input id="lp" type="password" autocomplete="current-password"><button class="btn" data-a="login">Masuk</button><button class="btn sec" data-a="tohome">Kembali</button></div>'}
+function vLogin(){return '<div class="gc p-6 mt-6"><div class="text-center mb-5"><div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-user-tie text-2xl text-teal-600"></i></div><h2 class="text-xl font-bold text-slate-800">Login Panitia</h2></div><label class="fl" style="margin-top:0">Username</label><input class="inp" id="lu" autocomplete="username"><label class="fl">Password</label><input class="inp" id="lp" type="password" autocomplete="current-password"><button class="btn mt-4" data-a="login">LOGIN</button></div>'}
 function vAdmin(){
- const a=S.ad;if(!a)return '<div class="box">Memuat...</div>';
- if(S.tab==='dash')return '<h2>Dashboard</h2><div class="box"><p style="text-align:center;color:var(--mu)">Total Suara</p><div class="big">'+a.total+'</div></div><div class="box"><h3>Perolehan Sementara</h3><br>'+bars(a.results)+'</div><button class="btn sec" data-a="refresh">Muat Ulang Data</button><button class="btn dg" data-a="logout">Keluar</button>';
- if(S.tab==='calon'){const e=S.ef;return '<h2>Data Calon</h2><div class="box"><h3>'+(e.id?'Edit Calon':'Tambah Calon')+'</h3><label>Nama</label><input id="cn" value="'+esc(e.nama||'')+'"><label>Visi Misi</label><textarea id="cv">'+esc(e.visi||'')+'</textarea><label>Foto</label><input id="cf" type="file" accept="image/*">'+(e.fotoData||e.foto?'<br><img class="ph" style="width:80px;height:80px;border-radius:10px;object-fit:cover" src="'+esc(e.fotoData||e.foto)+'" alt="">':'')+'<button class="btn" data-a="savecalon">Simpan</button>'+(e.id?'<button class="btn sec" data-a="cancel">Batal</button>':'')+'</div>'+a.calon.map(c=>'<div class="card"><img class="ph" src="'+esc(c.foto)+'" alt=""><div><h3>'+esc(c.nama)+'</h3><p>'+esc(c.visi)+'</p><br><button class="btn sm" data-a="editcalon" data-id="'+esc(c.id)+'">Edit</button><button class="btn sm dg" data-a="delcalon" data-id="'+esc(c.id)+'">Hapus</button></div></div>').join('')}
- if(S.tab==='gang')return '<h2>Data Gang</h2><div class="box"><label>Nama Gang Baru</label><input id="gn"><button class="btn" data-a="addgang">Tambah</button></div>'+a.gang.map(g=>'<div class="box row" style="align-items:center"><span>'+esc(g)+'</span><button class="btn sm dg" data-a="delgang" data-n="'+esc(g)+'">Hapus</button></div>').join('');
- if(S.tab==='log')return '<h2>Log Pemilih ('+a.log.length+')</h2><div class="box tw"><table><tr><th>Waktu</th><th>Gang</th><th>No</th><th>WhatsApp</th><th>Pilihan</th><th>Foto</th></tr>'+a.log.map(l=>'<tr><td>'+esc(l.ts)+'</td><td>'+esc(l.gang)+'</td><td>'+esc(l.rumah)+'</td><td>'+esc(l.wa)+'</td><td>'+esc(l.calon)+'</td><td><a href="'+esc(l.foto)+'" target="_blank" rel="noopener">Lihat</a></td></tr>').join('')+'</table></div>';
- return '<h2>Pengaturan Waktu</h2><div class="box"><label>Waktu Pengumuman Hasil (juga batas akhir voting)</label><input id="wt" type="datetime-local" value="'+localInput(a.deadline)+'"><button class="btn" data-a="savewaktu">Simpan Waktu</button></div>'}
+ const a=S.ad;if(!a)return '<div class="gc p-6 text-center text-sm text-slate-500"><i class="fa-solid fa-spinner fa-spin text-teal-600 mr-2"></i>Memuat...</div>';
+ if(S.tab==='dash')return '<div class="gc p-5 text-center"><p class="text-[10px] uppercase tracking-wide font-bold text-slate-400">Total Suara</p><p class="text-5xl font-extrabold text-teal-600 mt-1">'+a.total+'</p></div><div class="gc p-4"><h3 class="font-bold text-sm text-slate-800 mb-3">Perolehan Sementara</h3>'+bars(a.results)+'</div><div class="gc p-4"><h3 class="font-bold text-sm text-slate-800 mb-3">Suara Masuk per Gang</h3>'+bars(a.perGang)+'</div><button class="btn sec" data-a="refresh"><i class="fa-solid fa-rotate"></i>Muat Ulang Data</button><button class="btn dg" data-a="logout"><i class="fa-solid fa-right-from-bracket"></i>Keluar</button>';
+ if(S.tab==='calon'){const e=S.ef;return T('Data Calon','Manajemen')+'<div class="gc p-4"><h3 class="font-bold text-sm text-slate-800">'+(e.id?'Edit Calon':'Tambah Calon')+'</h3><label class="fl">Nama</label><input class="inp" id="cn" value="'+esc(e.nama||'')+'"><label class="fl">Visi Misi</label><textarea class="inp" id="cv">'+esc(e.visi||'')+'</textarea><label class="fl">Foto</label><input class="inp" id="cf" type="file" accept="image/*">'+(e.fotoData||e.foto?'<img class="av mt-2" style="width:80px;height:80px" src="'+esc(e.fotoData||e.foto)+'" alt="">':'')+'<div class="grid grid-cols-'+(e.id?2:1)+' gap-2 mt-3"><button class="btn" data-a="savecalon"><i class="fa-solid fa-check"></i>Simpan</button>'+(e.id?'<button class="btn sec" data-a="cancel">Batal</button>':'')+'</div></div>'+a.calon.map(c=>'<div class="gc p-3 flex gap-3"><img class="av" style="width:64px;height:64px" src="'+esc(c.foto)+'" alt=""><div class="min-w-0 flex-1"><h3 class="font-bold text-sm text-slate-800">'+esc(c.nama)+'</h3><p class="text-xs text-slate-500 mt-1" style="white-space:pre-line">'+esc(c.visi)+'</p><div class="mt-2 flex gap-2"><button class="btn sm" style="background:#eff6ff;color:#2563eb;box-shadow:none" data-a="editcalon" data-id="'+esc(c.id)+'"><i class="fa-solid fa-pen"></i>Edit</button><button class="btn sm" style="background:#fef2f2;color:#dc2626;box-shadow:none" data-a="delcalon" data-id="'+esc(c.id)+'"><i class="fa-solid fa-trash-can"></i>Hapus</button></div></div></div>').join('')}
+ if(S.tab==='gang')return T('Data Gang','Manajemen')+'<div class="gc p-4"><label class="fl" style="margin-top:0">Nama Gang Baru</label><input class="inp" id="gn" placeholder="Contoh: Gang Dahlia"><button class="btn mt-3" data-a="addgang"><i class="fa-solid fa-plus"></i>Tambah</button></div>'+a.gang.map(g=>'<div class="gc p-3 flex items-center justify-between"><span class="font-bold text-sm text-slate-800"><i class="fa-solid fa-house-flag text-teal-600 mr-2"></i>'+esc(g)+'</span><button class="btn sm" style="background:#fef2f2;color:#dc2626;box-shadow:none" data-a="delgang" data-n="'+esc(g)+'"><i class="fa-solid fa-trash-can"></i></button></div>').join('');
+ if(S.tab==='log')return T('Log Pemilih ('+a.log.length+')','Riwayat Suara')+'<div class="gc p-3 overflow-x-auto"><table class="tbl"><tr class="text-slate-400"><th>Waktu</th><th>Nama</th><th>Gang</th><th>No</th><th>WhatsApp</th><th>Pilihan</th><th>Foto</th></tr>'+a.log.map(l=>'<tr><td>'+esc(l.ts)+'</td><td>'+esc(l.nama)+'</td><td>'+esc(l.gang)+'</td><td>'+esc(l.rumah)+'</td><td>'+esc(l.wa)+'</td><td>'+esc(l.calon)+'</td><td><a class="text-teal-600 font-bold" href="'+esc(l.foto)+'" target="_blank" rel="noopener">Lihat</a></td></tr>').join('')+'</table></div>';
+ return T('Pengaturan Waktu','Jadwal')+'<div class="gc p-4"><label class="fl" style="margin-top:0">Waktu Pengumuman Hasil (juga batas akhir voting)</label><input class="inp" id="wt" type="datetime-local" value="'+localInput(a.deadline)+'"><button class="btn mt-3" data-a="savewaktu"><i class="fa-solid fa-floppy-disk"></i>Simpan Waktu</button></div>'}
 async function loadAdmin(){const r=await api('adminData');if(!r.ok){S.token='';toast(r.msg||'Sesi berakhir');go('login');return}S.ad=r;render()}
 
 /* ===== AKSI ===== */
-function bind(){document.querySelectorAll('#evt [data-a]').forEach(b=>b.onclick=()=>act(b.dataset.a,b))}
+document.addEventListener('click',e=>{
+ const g=e.target.closest('#app-container [data-g]');if(g)return go(g.dataset.g==='login'&&S.token?'admin':g.dataset.g);
+ const t=e.target.closest('#app-container [data-t]');if(t){S.tab=t.dataset.t;S.ef={};return render()}
+ if(e.target.id==='sheet')return closeSheet();
+ const b=e.target.closest('#app-container [data-a]');if(b)act(b.dataset.a,b)});
 async function act(a,b){
- const v=id=>{const e=document.querySelector('#evt #'+id);return e?e.value.trim():''};
- if(a==='tovote')return go('vote');if(a==='towait')return go('wait');if(a==='tologin')return go(S.token?'admin':'login');if(a==='tohome')return go('home');
- if(a==='next'){V.gang=v('fg');V.rumah=v('fr');V.wa=v('fw');const c=document.querySelector('#evt [name=fc]:checked');V.calon=c?c.value:'';
+ const v=id=>{const e=$(id);return e?e.value.trim():''};
+ if(a==='tovote')return go('vote');if(a==='towait')return go('wait');
+ if(a==='start'){V.step=1;V.photo='';return render()}
+ if(a==='review'){V.nama=v('fn');V.gang=v('fg');V.rumah=v('fr');V.wa=v('fw');const c=document.querySelector('#main [name=fc]:checked');V.calon=c?c.value:'';
+  if(V.nama.length<3)return toast('Isi nama lengkap Anda.');
   if(!V.gang||!V.rumah||!V.calon)return toast('Lengkapi gang, nomor rumah, dan pilihan calon.');
   if(!normWA(V.wa))return toast('Nomor WhatsApp tidak valid (contoh 081234567890).');
-  V.step=2;V.photo='';return render()}
- if(a==='back'){stopCam();V.step=1;return render()}
+  V.step=3;return render()}
+ if(a==='tofrm'||a==='edit'){V.step=2;return render()}
+ if(a==='back'){stopCam();V.step=(V.step===2?1:0);return render()}
  if(a==='shot')return shot();
  if(a==='retake'){V.photo='';return render()}
- if(a==='send'){b.disabled=true;b.textContent='Mengirim...';const r=await api('submitVote',{gang:V.gang,rumah:V.rumah,wa:V.wa,calon:V.calon,foto:V.photo});
-  if(r.ok){V.step=3;V.photo='';V.gang=V.rumah=V.wa=V.calon='';render()}else{toast(r.msg||'Gagal mengirim suara');b.disabled=false;b.textContent='Konfirmasi Kirim'}return}
- if(a==='login'){const r=await api('adminLogin',{u:v('lu'),p:document.querySelector('#evt #lp').value});if(!r.ok)return toast(r.msg||'Login gagal');S.token=r.token;S.view='admin';S.tab='dash';S.ad=null;render();return loadAdmin()}
+ if(a==='send')return sheet('<div class="text-center"><div class="w-14 h-14 mx-auto rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-2xl mb-3"><i class="fa-solid fa-triangle-exclamation"></i></div><h3 class="font-bold text-lg text-slate-800">Kirim Suara?</h3><p class="text-xs text-slate-500 mt-1 mb-5">Apakah pilihan Anda sudah benar? Suara yang sudah dikirim <b>tidak dapat diubah</b>.</p></div><div class="grid grid-cols-2 gap-3"><button class="btn sec" data-a="closesheet">Periksa Lagi</button><button class="btn" data-a="dosend"><i class="fa-solid fa-paper-plane"></i>Ya, Kirim</button></div>');
+ if(a==='closesheet')return closeSheet();
+ if(a==='dosend'){closeSheet();const r=await api('submitVote',{nama:V.nama,gang:V.gang,rumah:V.rumah,wa:V.wa,calon:V.calon,foto:V.photo});
+  if(r.ok){V.step=4;V.photo='';V.nama=V.gang=V.rumah=V.wa=V.calon='';render()}else toast(r.msg||'Gagal mengirim suara');return}
+ if(a==='login'){const r=await api('adminLogin',{u:v('lu'),p:$('lp').value});if(!r.ok)return toast(r.msg||'Login gagal');S.token=r.token;S.view='admin';S.tab='dash';S.ad=null;render();return loadAdmin()}
  if(a==='logout'){S.token='';S.ad=null;return go('home')}
  if(a==='refresh')return loadAdmin();
  if(a==='cancel'){S.ef={};return render()}
  if(a==='editcalon'){S.ef=Object.assign({},S.ad.calon.find(c=>c.id==b.dataset.id));return render()}
- if(a==='savecalon'){const n=v('cn');if(!n)return toast('Nama calon wajib diisi.');const f=document.querySelector('#evt #cf').files[0];const fd=f?await readImg(f,480):(S.ef.fotoData||'');
+ if(a==='savecalon'){const n=v('cn');if(!n)return toast('Nama calon wajib diisi.');const f=$('cf').files[0];const fd=f?await readImg(f,480):(S.ef.fotoData||'');
   const r=await api('saveCalon',{id:S.ef.id||'',nama:n,visi:v('cv'),fotoData:fd});toast(r.ok?'Calon tersimpan':r.msg);if(r.ok){S.ef={};await loadPublic();loadAdmin()}return}
  if(a==='delcalon'){if(!confirm('Hapus calon ini?'))return;const r=await api('deleteCalon',{id:b.dataset.id});toast(r.ok?'Calon dihapus':r.msg);if(r.ok){await loadPublic();loadAdmin()}return}
  if(a==='addgang'){const n=v('gn');if(!n)return toast('Isi nama gang.');const r=await api('addGang',{nama:n});toast(r.ok?'Gang ditambahkan':r.msg);if(r.ok){await loadPublic();loadAdmin()}return}
  if(a==='delgang'){if(!confirm('Hapus gang ini?'))return;const r=await api('deleteGang',{nama:b.dataset.n});toast(r.ok?'Gang dihapus':r.msg);if(r.ok){await loadPublic();loadAdmin()}return}
  if(a==='savewaktu'){const t=v('wt');if(!t)return toast('Pilih tanggal dan jam.');const r=await api('saveSetting',{key:'WaktuPengumuman',value:new Date(t).toISOString()});toast(r.ok?'Waktu tersimpan':r.msg);if(r.ok)loadAdmin()}
 }
-async function loadPublic(){const r=await api('getPublic');if(r.ok){S.calon=r.calon;S.gang=r.gang}}
+async function loadPublic(){const r=await api('getPublic',{},true);if(r.ok){S.calon=r.calon;S.gang=r.gang}}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stopCam()});
-(async function(){$('').innerHTML='<div class="top">E-Voting De Tanjung Raya</div><main><div class="box">Memuat data...</div></main>';await loadPublic();render()})();
+(async function(){
+ $('hd').textContent=new Intl.DateTimeFormat('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'Asia/Jakarta'}).format(new Date());
+ loading(true);await loadPublic();loading(false);render()})();
 })();
 </script>
