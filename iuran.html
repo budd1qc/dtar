@@ -53,6 +53,8 @@
 // UBAH IS_PREVIEW KE false JIKA AKAN DI-DEPLOY KE BLOGGER
 const IS_PREVIEW = true; // Set default true untuk Canvas
 const GAS_URL = "URL_DEPLOY_GAS_ANDA_DISINI";
+// Alamat halaman aplikasi yang dibuka warga (link jadi: PUBLIC_URL + "?p=idrumah"). Kosongkan untuk memakai alamat halaman ini.
+const PUBLIC_URL = "https://budd1qc.github.io/dtar/iuran.html";
 
 const BLN=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 const THN=new Date().getFullYear(),BLNNOW=new Date().getMonth()+1;
@@ -61,7 +63,7 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;',
 const rp=n=>'Rp '+Number(n||0).toLocaleString('id-ID');
 const mask=n=>{n=String(n||'');return n.length<=3?n.charAt(0)+'**':n.slice(0,2)+'***'+n.slice(-1)};
 const cmp=(a,b)=>a.gang.localeCompare(b.gang)||a.idrumah.localeCompare(b.idrumah,undefined,{numeric:true});
-let D=null,TOKEN='',USER=null,DB=null;
+let D=null,TOKEN='',USER=null,DB=null,PIDX=null;
 let S={menu:'dash',tahun:THN,gang:'',tab:'gang',payId:'',payB:[],q:''};
 const MENU=[['dash','Dashboard'],['iuran','Iuran Bulanan'],['bayar','Pembayaran'],['tunggak','Tunggakan'],['riwayat','Riwayat Pembayaran'],['rekap','Rekap Tahunan'],['master','Data Blok/Rumah']];
 
@@ -135,7 +137,12 @@ const canEdit=()=>USER&&USER.role==='bendahara';
 const tahunList=()=>D.periode.map(x=>+x.tahun).sort((a,b)=>b-a);
 const statusList=()=>[...new Set(D.tarif.map(x=>x.status_rumah))];
 const tarifOf=(t,st)=>{const x=D.tarif.find(r=>+r.tahun===+t&&r.status_rumah===st);return x?+x.nominal:null};
-const lunas=(id,t,b)=>D.iuran.find(r=>r.idrumah===id&&+r.periode===+t&&+r.bulan===b&&r.status_bayar==='aktif');
+const lunas=(id,t,b)=>{if(!PIDX){PIDX=new Map();D.iuran.forEach(r=>{if(r.status_bayar==='aktif')PIDX.set(r.idrumah+'|'+r.periode+'|'+r.bulan,r)})}return PIDX.get(id+'|'+t+'|'+b)};
+const pubLink=id=>(PUBLIC_URL||(location.origin+location.pathname))+'?p='+encodeURIComponent(String(id).toLowerCase());
+function idLink(id){const st='color:#1d4ed8;font-weight:700;text-decoration:underline';
+ return IS_PREVIEW?'<a href="#" style="'+st+'" title="Buka halaman warga" onclick="showPublic(\''+esc(id)+'\');return false">'+esc(id)+'</a>'
+ :'<a href="'+esc(pubLink(id))+'" target="_blank" rel="noopener" style="'+st+'" title="'+esc(pubLink(id))+'">'+esc(id)+'</a>'}
+function salin(id){const u=pubLink(id);if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(()=>toast('Link disalin: '+u),()=>prompt('Salin link:',u));else prompt('Salin link:',u)}
 const sampai=t=>+t<THN?12:(+t===THN?BLNNOW:0);
 function tunggak(r,t){const n=tarifOf(t,r.status)||0,m=[];for(let b=1;b<=sampai(t);b++)if(!lunas(r.idrumah,t,b))m.push(b);return{m:m,total:m.length*n}}
 function usedBy(sh,row){
@@ -154,11 +161,12 @@ function bar(t,g){
 /* ===== LOGIN / SESI ===== */
 function showLogin(){
  $('#view').innerHTML='<div class="top"><b>Iuran Warga Perumahan'+(IS_PREVIEW?' (Preview)':'')+'</b></div><div class="login"><div class="card"><h3 style="margin-top:0">Login Bendahara</h3>'
- +'<input id="lu" placeholder="Username" autocomplete="username"><input id="lp" type="password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key===\'Enter\')doLogin()">'
+ +'<input id="lu" placeholder="Username" autocomplete="username" value="'+(IS_PREVIEW?'admin':'')+'"><input id="lp" type="password" placeholder="Password" autocomplete="current-password" value="'+(IS_PREVIEW?'edudigital':'')+'" onkeydown="if(event.key===\'Enter\')doLogin()">'
  +'<button style="width:100%" onclick="doLogin()">Masuk</button>'
- +(IS_PREVIEW?'<hr style="margin:14px 0;border:0;border-top:1px solid #e2e8f0"><p style="font-size:12px;color:#64748b;margin:0 0 8px">Mode Preview (data dummy).<br>admin / edudigital (bendahara)<br>peserta / edudigital (pengurus, hanya lihat)</p><p style="margin:0 0 6px;font-weight:600;font-size:13px">Coba tampilan warga:</p><input id="dp" placeholder="ID rumah, mis. K1" style="margin-bottom:6px"><button class="gray" style="width:100%" onclick="showPublic($(\'#dp\').value)">Lihat Iuran Warga</button>':'')
+ +(IS_PREVIEW?'<button class="gray" style="width:100%;margin-top:8px" onclick="loginAs(\'peserta\')">Masuk sebagai Pengurus (hanya lihat)</button><hr style="margin:14px 0;border:0;border-top:1px solid #e2e8f0"><p style="font-size:12px;color:#64748b;margin:0 0 8px">Mode Preview (data dummy). Kolom login sudah terisi, tinggal klik Masuk.</p><p style="margin:0 0 6px;font-weight:600;font-size:13px">Coba tampilan warga:</p><input id="dp" placeholder="ID rumah, mis. K1" style="margin-bottom:6px"><button class="gray" style="width:100%" onclick="showPublic($(\'#dp\').value)">Lihat Iuran Warga</button>':'')
  +'</div></div>';
 }
+function loginAs(u){$('#lu').value=u;$('#lp').value='edudigital';doLogin()}
 async function doLogin(){
  const r=await api('login',{user:$('#lu').value.trim(),pass:$('#lp').value});
  if(!r.ok)return toast(r.msg||'Login gagal');
@@ -170,7 +178,7 @@ function logout(){TOKEN='';USER=null;D=null;try{sessionStorage.removeItem('iw')}
 async function load(){
  const r=await api('getAll');
  if(!r.ok){logout();toast(r.msg||'Gagal memuat data');return false}
- D=r;
+ D=r;PIDX=null;
  if(!tahunList().includes(S.tahun))S.tahun=tahunList()[0]||THN;
  if(!S.payId&&D.rumah.length)S.payId=[...D.rumah].sort(cmp)[0].idrumah;
  return true;
@@ -198,16 +206,30 @@ function vDash(){
 }
 
 /* ===== IURAN BULANAN ===== */
-function vIuran(){
- const t=S.tahun,rows=D.rumah.filter(r=>!S.gang||r.gang===S.gang).sort(cmp);
- let h=bar('Iuran Bulanan',1)+'<div class="tw"><table><tr><th>Rumah</th><th>Nama</th><th>Status</th>'+BLN.map(b=>'<th>'+b+'</th>').join('')+'</tr>';
- rows.forEach(r=>{h+='<tr><td><b>'+esc(r.idrumah)+'</b></td><td>'+esc(r.nama_pemilik)+'</td><td>'+esc(r.status)+'</td>';
+function iuranRows(){
+ const t=S.tahun,q=(S.iq||'').toLowerCase(),so=S.isort||'id';
+ const L=D.rumah.filter(r=>(!S.gang||r.gang===S.gang)&&(!q||(r.idrumah+' '+r.nama_pemilik).toLowerCase().includes(q))).map(r=>({r:r,tg:tunggak(r,t).m.length}));
+ L.sort((a,b)=>so==='nama'?a.r.nama_pemilik.localeCompare(b.r.nama_pemilik):so==='status'?(a.r.status.localeCompare(b.r.status)||cmp(a.r,b.r)):so==='tung'?(b.tg-a.tg||cmp(a.r,b.r)):so==='lunas'?(a.tg-b.tg||cmp(a.r,b.r)):cmp(a.r,b.r));
+ return L;
+}
+function iuranTbl(){
+ const t=S.tahun,L=iuranRows();
+ let h='<table><tr><th>Rumah</th><th>Nama</th><th>Status</th>'+BLN.map(b=>'<th>'+b+'</th>').join('')+'<th title="Jumlah bulan menunggak">Tgk</th></tr>';
+ L.forEach(x=>{const r=x.r;h+='<tr><td>'+idLink(r.idrumah)+'</td><td>'+esc(r.nama_pemilik)+'</td><td>'+esc(r.status)+'</td>';
   for(let b=1;b<=12;b++){const p=lunas(r.idrumah,t,b);
    if(p)h+='<td class="ok" title="'+esc(p.tanggal+' · '+p.metode+' · '+rp(p.nominal))+'">✓</td>';
    else if(b<=sampai(t))h+='<td class="no" '+(canEdit()?'style="cursor:pointer" onclick="payFor(\''+r.idrumah+'\','+b+')"':'')+'>✗</td>';
    else h+='<td class="fu">·</td>'}
-  h+='</tr>'});
- return h+'</table></div><p style="color:#64748b">✓ lunas · ✗ belum bayar (klik untuk membayar) · · belum jatuh tempo</p>';
+  h+='<td class="'+(x.tg?'neg':'')+'"><b>'+x.tg+'</b></td></tr>'});
+ if(!L.length)h+='<tr><td colspan="16">Tidak ada data yang cocok</td></tr>';
+ return h+'</table>';
+}
+function iuranRefresh(){$('#it').innerHTML=iuranTbl();$('#ic').textContent=iuranRows().length+' rumah'}
+function vIuran(){
+ const so=[['id','ID rumah'],['nama','Nama A-Z'],['status','Status rumah'],['tung','Tunggakan terbanyak'],['lunas','Paling lunas']];
+ return bar('Iuran Bulanan',1)+'<div class="bar"><input placeholder="Cari ID / nama pemilik" value="'+esc(S.iq||'')+'" oninput="S.iq=this.value;iuranRefresh()"><select onchange="S.isort=this.value;iuranRefresh()">'
+ +so.map(x=>'<option value="'+x[0]+'" '+((S.isort||'id')===x[0]?'selected':'')+'>Urutkan: '+x[1]+'</option>').join('')+'</select><span id="ic" style="color:#64748b">'+iuranRows().length+' rumah</span></div>'
+ +'<div class="tw" id="it">'+iuranTbl()+'</div><p style="color:#64748b">✓ lunas · ✗ belum bayar (klik untuk membayar) · · belum jatuh tempo · Tgk = jumlah bulan menunggak · klik ID rumah untuk membuka halaman warga</p>';
 }
 function payFor(id,b){S.payId=id;S.payB=[b];S.menu='bayar';render()}
 
@@ -216,13 +238,34 @@ function vBayar(){
  if(!canEdit())return bar('Pembayaran')+'<div class="card">Role Anda hanya dapat melihat data. Input pembayaran hanya untuk bendahara.</div>';
  if(!D.rumah.length)return bar('Pembayaran')+'<div class="card">Belum ada data rumah. Tambahkan di menu Data Blok/Rumah.</div>';
  const today=new Date().toISOString().slice(0,10);
- return bar('Pembayaran')+'<div class="card"><div class="fg"><label>Rumah<select id="pr" onchange="S.payB=[];pm()">'
- +[...D.rumah].sort(cmp).map(r=>'<option value="'+esc(r.idrumah)+'" '+(r.idrumah===S.payId?'selected':'')+'>'+esc(r.idrumah)+' - '+esc(r.nama_pemilik)+' ('+esc(r.gang)+')</option>').join('')
+ return bar('Pembayaran')+'<div class="card"><div class="fg"><label>Filter gang<select id="pg" onchange="fillRumah()"><option value="">Semua gang</option>'
+ +D.gang.map(g=>'<option '+(g.nama===S.payG?'selected':'')+'>'+esc(g.nama)+'</option>').join('')
+ +'</select></label><label>Cari (ID / nama / no rumah)<input id="pq" placeholder="mis. K1 atau ISMAN" value="'+esc(S.payQ||'')+'" oninput="fillRumah()"></label></div>'
+ +'<div class="fg"><label>Rumah <span id="pc" style="font-weight:400;color:#64748b">'+rumahFilt().length+' rumah</span><select id="pr" onchange="S.payB=[];pm()">'
+ +rumahOpts()
  +'</select></label><label>Tanggal bayar<input type="date" id="pt" value="'+today+'"></label><label>Metode<select id="pmt"><option>Tunai</option><option>Transfer</option></select></label></div><div id="pm"></div><button onclick="simpanBayar()">Simpan Pembayaran</button></div>';
+}
+function rumahFilt(){
+ const g=S.payG||'',q=(S.payQ||'').toLowerCase();
+ return D.rumah.filter(r=>(!g||r.gang===g)&&(!q||(r.idrumah+' '+r.nama_pemilik+' '+r.norumah).toLowerCase().includes(q))).sort(cmp);
+}
+function rumahOpts(){
+ const L=rumahFilt();
+ if(L.length&&!L.some(r=>r.idrumah===S.payId))S.payId=L[0].idrumah;
+ return L.map(r=>'<option value="'+esc(r.idrumah)+'" '+(r.idrumah===S.payId?'selected':'')+'>'+esc(r.idrumah)+' - '+esc(r.nama_pemilik)+' ('+esc(r.gang)+')</option>').join('');
+}
+function fillRumah(){
+ S.payG=$('#pg').value;S.payQ=$('#pq').value;
+ const prev=S.payId;
+ $('#pr').innerHTML=rumahOpts();
+ $('#pc').textContent=rumahFilt().length+' rumah';
+ if(S.payId!==prev)S.payB=[];
+ pm();
 }
 function pm(){
  const sel=$('#pr');if(!sel)return;
  const id=sel.value;S.payId=id;
+ if(!id){S.payB=[];$('#pm').innerHTML='<p class="neg">Tidak ada rumah yang cocok dengan filter/pencarian.</p>';return}
  const r=D.rumah.find(x=>x.idrumah===id),t=S.tahun,n=tarifOf(t,r.status);
  let h='<p>Status rumah: <b>'+esc(r.status)+'</b> · Iuran per bulan: <b>'+(n==null?'<span class="neg">tarif belum diatur</span>':rp(n))+'</b></p><div class="mg">';
  for(let b=1;b<=12;b++){const p=lunas(id,t,b);
@@ -231,6 +274,7 @@ function pm(){
 }
 function togB(b,c){S.payB=c?S.payB.concat([b]):S.payB.filter(x=>x!==b);pm()}
 async function simpanBayar(){
+ if(!S.payId)return toast('Pilih rumah terlebih dahulu');
  if(!S.payB.length)return toast('Pilih minimal satu bulan');
  const r=await api('savePayment',{idrumah:S.payId,tahun:S.tahun,bulan:S.payB,tanggal:$('#pt').value,metode:$('#pmt').value});
  if(!r.ok)return toast(r.msg||'Gagal menyimpan');
@@ -294,8 +338,9 @@ function vMaster(){
  const c=CFG[S.tab],arr=D[S.tab],cols=c.f.filter(f=>!f.p);
  let h='<div class="bar"><h2>Data Blok/Rumah</h2></div><div class="bar">'+tabs.map(t=>'<button class="'+(S.tab===t?'':'gray')+'" onclick="S.tab=\''+t+'\';render()">'+CFG[t].t+'</button>').join('')
  +(canEdit()?'<button style="margin-left:auto" onclick="openForm(\''+S.tab+'\',-1)">+ Tambah</button>':'')+'</div>'
- +'<div class="tw"><table><tr>'+cols.map(f=>'<th>'+f.l+'</th>').join('')+(canEdit()?'<th>Aksi</th>':'')+'</tr>';
- arr.forEach((r,i)=>{h+='<tr>'+cols.map(f=>'<td>'+(f.k==='nominal'?rp(r[f.k]):esc(r[f.k]))+'</td>').join('')
+ +'<div class="tw"><table><tr>'+cols.map(f=>'<th>'+f.l+'</th>').join('')+(S.tab==='rumah'?'<th>Link warga</th>':'')+(canEdit()?'<th>Aksi</th>':'')+'</tr>';
+ arr.forEach((r,i)=>{h+='<tr>'+cols.map(f=>'<td>'+(f.k==='nominal'?rp(r[f.k]):(f.k==='idrumah'?idLink(r[f.k]):esc(r[f.k])))+'</td>').join('')
+  +(S.tab==='rumah'?'<td><button class="sm gray" onclick="salin(\''+esc(r.idrumah)+'\')">Salin link</button></td>':'')
   +(canEdit()?'<td><button class="sm" onclick="openForm(\''+S.tab+'\','+i+')">Edit</button> <button class="sm red" onclick="delRow(\''+S.tab+'\','+i+')">Hapus</button></td>':'')+'</tr>'});
  if(!arr.length)h+='<tr><td colspan="9">Belum ada data</td></tr>';
  return h+'</table></div>'+(S.tab==='tarif'?'<p style="color:#64748b">Daftar status rumah (ditempati/kosong/dikontrakkan, dst.) mengikuti data tarif ini. Tambah status baru dengan menambah tarifnya.</p>':'');
@@ -332,7 +377,7 @@ async function delRow(sh,i){
 async function showPublic(id){
  id=String(id||'').trim();if(!id)return toast('Isi ID rumah');
  const r=await api('publicView',{p:id});
- const back=IS_PREVIEW?'<button onclick="showLogin()">Kembali</button>':'';
+ const back=IS_PREVIEW?'<button onclick="USER?shell():showLogin()">Kembali</button>':'';
  let h='<div class="top"><b>Iuran Warga Perumahan</b>'+back+'</div><div class="main"><div style="max-width:760px;margin:auto">';
  if(!r.ok)return $('#view').innerHTML=h+'<div class="card"><h3 style="margin-top:0">Data tidak ditemukan</h3><p>'+(r.msg||'')+'</p></div></div></div>';
  const x=r.rumah;let tot=0,tg=0,tm=[];
