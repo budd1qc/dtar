@@ -56,6 +56,7 @@ const GAS_URL = "URL_DEPLOY_GAS_ANDA_DISINI";
 // Alamat halaman aplikasi yang dibuka warga (link jadi: PUBLIC_URL + "?p=idrumah"). Kosongkan untuk memakai alamat halaman ini.
 const PUBLIC_URL = "https://budd1qc.github.io/dtar/iuran.html";
 
+const BLNF=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 const BLN=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 const THN=new Date().getFullYear(),BLNNOW=new Date().getMonth()+1;
 const $=s=>document.querySelector(s);
@@ -92,6 +93,7 @@ function buildDB(){
  db.iuran[2].status_bayar='batal';
  return db;
 }
+function newTrx(){const d=new Date(),z=n=>String(n).padStart(2,'0');return 'TRX-'+d.getFullYear()+z(d.getMonth()+1)+z(d.getDate())+'-'+z(d.getHours())+z(d.getMinutes())+z(d.getSeconds())+'-'+Math.floor(100+Math.random()*900)}
 function mock(a,p){
  if(a==='login'){const u=DB.admin.find(x=>x.id===p.user&&x.pass===p.pass);
   return u?{ok:true,token:'prev-'+u.id,user:{id:u.id,nama:u.nama,role:u.role}}:{ok:false,msg:'Username atau password salah'}}
@@ -111,8 +113,8 @@ function mock(a,p){
   const tf=DB.tarif.find(x=>+x.tahun===+p.tahun&&x.status_rumah===r.status);
   if(!tf)return{ok:false,msg:'Tarif status "'+r.status+'" tahun '+p.tahun+' belum diatur'};
   for(const b of p.bulan)if(DB.iuran.some(i=>i.idrumah===r.idrumah&&+i.periode===+p.tahun&&+i.bulan===b&&i.status_bayar==='aktif'))return{ok:false,msg:'Bulan '+BLN[b-1]+' sudah dibayar'};
-  p.bulan.forEach(b=>DB.iuran.push({id:'T'+Date.now()+b,tanggal:p.tanggal,gang:r.gang,idrumah:r.idrumah,nama:r.nama_pemilik,periode:+p.tahun,status_rumah:r.status,bulan:b,nominal:+tf.nominal,metode:p.metode,created_at:new Date().toISOString().slice(0,19),status_bayar:'aktif'}));
-  return{ok:true}}
+  const trx=newTrx();p.bulan.forEach(b=>DB.iuran.push({id:trx+'-'+String(b).padStart(2,'0'),tanggal:p.tanggal,gang:r.gang,idrumah:r.idrumah,nama:r.nama_pemilik,periode:+p.tahun,status_rumah:r.status,bulan:b,nominal:+tf.nominal,metode:p.metode,created_at:new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,19),status_bayar:'aktif'}));
+  return{ok:true,trx:trx}}
  if(a==='cancelPayment'){const x=DB.iuran.find(i=>i.id===p.id);if(!x)return{ok:false,msg:'Data tidak ditemukan'};x.status_bayar='batal';return{ok:true}}
  if(a==='saveRow'||a==='delRow'){
   const c=CFG[p.sheet],arr=DB[p.sheet],idx=arr.findIndex(x=>c.keys.every(k=>String(x[k])===String(p.row[k])));
@@ -273,12 +275,63 @@ function pm(){
  $('#pm').innerHTML=h+'</div><p>Total dibayar: <b>'+rp((n||0)*S.payB.length)+'</b> ('+S.payB.length+' bulan, periode '+t+')</p>';
 }
 function togB(b,c){S.payB=c?S.payB.concat([b]):S.payB.filter(x=>x!==b);pm()}
-async function simpanBayar(){
+const trxOf=id=>String(id).replace(/-\d{2}$/,'');
+const fmtTgl=x=>{const m=String(x).match(/^(\d{4})-(\d{2})-(\d{2})/);return m?(+m[3])+' '+BLNF[+m[2]-1]+' '+m[1]:esc(x)};
+function simpanBayar(){
  if(!S.payId)return toast('Pilih rumah terlebih dahulu');
  if(!S.payB.length)return toast('Pilih minimal satu bulan');
- const r=await api('savePayment',{idrumah:S.payId,tahun:S.tahun,bulan:S.payB,tanggal:$('#pt').value,metode:$('#pmt').value});
- if(!r.ok)return toast(r.msg||'Gagal menyimpan');
- toast('Pembayaran tersimpan');S.payB=[];await load();render();
+ const r=D.rumah.find(x=>x.idrumah===S.payId),t=S.tahun,n=tarifOf(t,r.status),tgl=$('#pt').value,met=$('#pmt').value;
+ if(n==null)return toast('Tarif status "'+r.status+'" tahun '+t+' belum diatur');
+ if(!tgl)return toast('Tanggal bayar wajib diisi');
+ const bl=S.payB.slice().sort((a,b)=>a-b);
+ S.pend={idrumah:S.payId,tahun:t,bulan:bl,tanggal:tgl,metode:met};
+ const rw=(a,b)=>'<tr><td style="color:#64748b">'+a+'</td><td><b>'+b+'</b></td></tr>';
+ $('#mod').innerHTML='<div><h3 style="margin-top:0">Konfirmasi Pembayaran</h3><p style="margin:0 0 8px;color:#64748b">Periksa data berikut sebelum disimpan.</p>'
+ +'<table>'+rw('ID rumah',esc(r.idrumah))+rw('Nama pemilik',esc(r.nama_pemilik))+rw('Gang',esc(r.gang))+rw('Status rumah',esc(r.status))+rw('Periode',t)+rw('Tanggal bayar',fmtTgl(tgl))+rw('Metode',esc(met))+'</table>'
+ +'<table style="margin-top:10px"><tr><th>Bulan</th><th style="text-align:right">Nominal</th></tr>'+bl.map(b=>'<tr><td>'+BLNF[b-1]+' '+t+'</td><td style="text-align:right">'+rp(n)+'</td></tr>').join('')
+ +'<tr><th>Total ('+bl.length+' bulan)</th><th style="text-align:right">'+rp(n*bl.length)+'</th></tr></table>'
+ +'<div style="text-align:right;margin-top:12px"><button class="gray" onclick="closeMod()">Periksa lagi</button> <button id="bk" onclick="konfirmasiSimpan()">Ya, Simpan</button></div></div>';
+ $('#mod').style.display='flex';
+}
+async function konfirmasiSimpan(){
+ const bt=$('#bk');if(!bt||bt.disabled)return;
+ bt.disabled=true;bt.textContent='Menyimpan...';
+ const r=await api('savePayment',S.pend);
+ if(!r.ok){closeMod();return toast(r.msg||'Gagal menyimpan')}
+ S.payB=[];await load();render();showReceipt(r.trx);
+}
+function receiptData(trx){
+ const L=D.iuran.filter(r=>r.status_bayar==='aktif'&&trxOf(r.id)===trx).sort((a,b)=>a.bulan-b.bulan);
+ if(!L.length)return null;const f=L[0];
+ return{trx:trx,tanggal:f.tanggal,nama:f.nama,idrumah:f.idrumah,gang:f.gang,status:f.status_rumah,periode:f.periode,metode:f.metode,
+  waktu:String(f.created_at).slice(0,16).replace('T',' '),rows:L.map(r=>({bulan:r.bulan,nominal:+r.nominal})),total:L.reduce((q,r)=>q+(+r.nominal),0)};
+}
+function receiptHtml(x){
+ const rw=(a,b)=>'<tr><td style="padding:3px 0;color:#64748b;width:40%">'+a+'</td><td style="padding:3px 0"><b>'+b+'</b></td></tr>';
+ return '<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:13px;color:#0f172a">'
+ +'<div style="text-align:center;border-bottom:2px dashed #94a3b8;padding-bottom:8px;margin-bottom:8px"><div style="font-size:16px;font-weight:700">BUKTI PEMBAYARAN IURAN</div><div style="color:#166534;font-weight:700">LUNAS</div></div>'
+ +'<table style="width:100%;border-collapse:collapse">'+rw('No. Transaksi',esc(x.trx))+rw('Tanggal bayar',fmtTgl(x.tanggal))+rw('Nama pemilik',esc(x.nama))+rw('ID rumah',esc(x.idrumah))+rw('Gang',esc(x.gang))+rw('Status rumah',esc(x.status))+rw('Periode',x.periode)+rw('Metode',esc(x.metode))+rw('Dicatat pada',esc(x.waktu))+'</table>'
+ +'<table style="width:100%;border-collapse:collapse;margin-top:10px;border-top:1px solid #cbd5e1"><tr><th style="text-align:left;padding:4px 0">Rincian</th><th style="text-align:right;padding:4px 0">Nominal</th></tr>'
+ +x.rows.map(r=>'<tr><td style="padding:3px 0">Iuran '+BLNF[r.bulan-1]+' '+x.periode+'</td><td style="padding:3px 0;text-align:right">'+rp(r.nominal)+'</td></tr>').join('')
+ +'<tr><td style="padding:6px 0;border-top:1px solid #0f172a"><b>TOTAL</b></td><td style="padding:6px 0;border-top:1px solid #0f172a;text-align:right"><b>'+rp(x.total)+'</b></td></tr></table>'
+ +'<p style="text-align:center;color:#64748b;font-size:11px;margin:10px 0 0">Simpan bukti ini sebagai arsip pembayaran Anda.</p></div>';
+}
+function showReceipt(trx){
+ const x=receiptData(trx);if(!x)return toast('Bukti pembayaran tidak ditemukan');
+ $('#mod').innerHTML='<div><div style="text-align:center;color:#166534;font-weight:700;margin-bottom:8px">✓ Pembayaran berhasil disimpan</div>'+receiptHtml(x)
+ +'<div style="text-align:right;margin-top:12px"><button class="gray" onclick="closeMod()">Tutup</button> <button class="gray" onclick="salinBukti(\''+esc(trx)+'\')">Salin teks</button> <button onclick="cetakBukti(\''+esc(trx)+'\')">Cetak / PDF</button></div></div>';
+ $('#mod').style.display='flex';
+}
+function cetakBukti(trx){
+ const x=receiptData(trx);if(!x)return;
+ const w=window.open('','_blank');if(!w)return toast('Pop-up diblokir browser');
+ w.document.write('<html><head><title>Bukti '+esc(trx)+'</title></head><body style="max-width:420px;margin:20px auto">'+receiptHtml(x)+'</body></html>');
+ w.document.close();w.print();
+}
+function salinBukti(trx){
+ const x=receiptData(trx);if(!x)return;
+ const t='BUKTI PEMBAYARAN IURAN\nNo. Transaksi: '+x.trx+'\nTanggal bayar: '+fmtTgl(x.tanggal)+'\nNama pemilik: '+x.nama+'\nID rumah: '+x.idrumah+' (Gang '+x.gang+')\nStatus rumah: '+x.status+'\nPeriode: '+x.periode+'\nMetode: '+x.metode+'\nRincian:\n'+x.rows.map(r=>'- '+BLNF[r.bulan-1]+' '+x.periode+': '+rp(r.nominal)).join('\n')+'\nTOTAL: '+rp(x.total)+'\nStatus: LUNAS';
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(()=>toast('Teks bukti disalin'),()=>prompt('Salin teks bukti:',t));else prompt('Salin teks bukti:',t);
 }
 
 /* ===== TUNGGAKAN ===== */
@@ -298,10 +351,10 @@ function vRiw(){
  let L=D.iuran.filter(r=>+r.periode===+S.tahun&&(!S.gang||r.gang===S.gang)&&(!q||(r.idrumah+' '+r.nama).toLowerCase().includes(q))).sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)));
  const n=L.length;L=L.slice(0,300);
  let h=bar('Riwayat Pembayaran',1).replace('</div>','<input placeholder="Cari ID/nama (Enter)" value="'+esc(S.q)+'" onchange="S.q=this.value;render()"></div>');
- h+='<div class="tw"><table><tr><th>Tanggal</th><th>Rumah</th><th>Nama</th><th>Gang</th><th>Bulan</th><th>Nominal</th><th>Metode</th><th>Status</th>'+(canEdit()?'<th>Aksi</th>':'')+'</tr>';
+ h+='<div class="tw"><table><tr><th>Tanggal</th><th>Rumah</th><th>Nama</th><th>Gang</th><th>Bulan</th><th>Nominal</th><th>Metode</th><th>Status</th><th>Aksi</th></tr>';
  L.forEach(r=>{const a=r.status_bayar==='aktif';
   h+='<tr style="'+(a?'':'opacity:.55;text-decoration:line-through')+'"><td>'+esc(r.tanggal)+'</td><td><b>'+esc(r.idrumah)+'</b></td><td>'+esc(r.nama)+'</td><td>'+esc(r.gang)+'</td><td>'+BLN[r.bulan-1]+' '+r.periode+'</td><td>'+rp(r.nominal)+'</td><td>'+esc(r.metode)+'</td><td><span class="tag '+(a?'g':'r')+'">'+(a?'aktif':'batal')+'</span></td>'
-  +(canEdit()?'<td>'+(a?'<button class="sm red" onclick="batal(\''+esc(r.id)+'\')">Batalkan</button>':'')+'</td>':'')+'</tr>'});
+  +'<td>'+(a?'<button class="sm" onclick="showReceipt(\''+esc(trxOf(r.id))+'\')">Bukti</button> ':'')+(a&&canEdit()?'<button class="sm red" onclick="batal(\''+esc(r.id)+'\')">Batalkan</button>':'')+'</td></tr>'});
  if(!L.length)h+='<tr><td colspan="9">Belum ada data</td></tr>';
  return h+'</table></div>'+(n>300?'<p style="color:#64748b">Menampilkan 300 dari '+n+' data terbaru. Gunakan pencarian/filter.</p>':'');
 }
